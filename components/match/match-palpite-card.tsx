@@ -1,0 +1,176 @@
+'use client';
+
+import { Check, ChevronRight, Clock, Pencil } from 'lucide-react';
+import { PalpiteCtaButton } from '@/components/match/palpite-cta-button';
+import type { Partida } from '@/lib/partidas';
+import { DEFAULT_TEAM_LOGO } from '@/lib/partidas';
+import { getKickoffCountdown } from '@/lib/match-time';
+import { partidaTemResultado, partidaAoVivo } from '@/lib/partida-status';
+import type { PalpiteLocal } from '@/lib/palpites';
+
+interface MatchPalpiteCardProps {
+  game: Partida;
+  palpite?: PalpiteLocal;
+  onAction: () => void;
+}
+
+function MiniFlag({ logo, alt }: { logo: string; alt: string }) {
+  return (
+    <img
+      src={logo}
+      alt={alt}
+      className="w-5 h-5 object-contain rounded-sm"
+      onError={(e) => {
+        const img = e.currentTarget;
+        img.onerror = null;
+        img.src = DEFAULT_TEAM_LOGO;
+      }}
+    />
+  );
+}
+
+export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardProps) {
+  const hasPalpite = !!palpite && palpite.golsCasa !== '' && palpite.golsFora !== '';
+  const countdown = getKickoffCountdown(game);
+  const showOfficialScore = partidaTemResultado(game);
+
+  return (
+    <div className="frosted-card">
+      <div className="frosted-card__blur" aria-hidden />
+      <div className="frosted-card__glass" aria-hidden />
+      <div className="frosted-card__shine" aria-hidden />
+
+      <div className="frosted-card__content">
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <div className="flex items-center gap-2 text-sm text-white/75">
+            <Clock size={15} className="opacity-60" />
+            <span className="font-medium tabular-nums">{game.horario}</span>
+          </div>
+          <span className="text-xs font-semibold tracking-wide text-white/45 uppercase">
+            {countdown}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 px-4 pb-4">
+          <div className="flex-1 flex items-center justify-center gap-3 min-w-0">
+            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+              <img
+                src={game.logoCasa}
+                alt={game.casa}
+                className="w-12 h-12 object-contain drop-shadow-sm"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = DEFAULT_TEAM_LOGO;
+                }}
+              />
+              <span className="text-[11px] font-bold tracking-[0.18em] text-white/90">
+                {game.siglaCasa}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center shrink-0 px-1">
+              {showOfficialScore ? (
+                <>
+                  <span className="text-[9px] uppercase tracking-widest text-white/40 mb-0.5">
+                    {partidaAoVivo(game) ? 'Ao vivo' : 'Placar'}
+                  </span>
+                  <span className="text-lg font-bold tabular-nums">
+                    {game.golsCasa} × {game.golsVisitante}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs text-white/40 font-medium">Vs</span>
+              )}
+            </div>
+
+            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+              <img
+                src={game.logoFora}
+                alt={game.fora}
+                className="w-12 h-12 object-contain drop-shadow-sm"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = DEFAULT_TEAM_LOGO;
+                }}
+              />
+              <span className="text-[11px] font-bold tracking-[0.18em] text-white/90">
+                {game.siglaFora}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5 shrink-0 w-[72px]">
+            {hasPalpite ? (
+              <>
+                <div className="w-10 h-10 rounded-xl frosted-card-inner bg-emerald-500/15 border-emerald-400/30 flex items-center justify-center">
+                  <Check size={18} className="text-emerald-300" strokeWidth={2.5} />
+                </div>
+                <span className="text-[10px] font-medium text-emerald-400 text-center leading-tight">
+                  Palpite feito
+                </span>
+              </>
+            ) : (
+              <>
+                <div className="w-10 h-10 rounded-xl frosted-card-inner" />
+                <span className="text-[10px] text-white/40 text-center leading-tight">
+                  Sem palpite
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {hasPalpite ? (
+          <button
+            type="button"
+            onClick={onAction}
+            className="frosted-card-inner w-[calc(100%-2rem)] mx-4 mb-4 flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/[0.08] transition-colors text-left"
+          >
+            <span className="text-[10px] font-semibold tracking-widest text-white/50 shrink-0">
+              SEU PALPITE:
+            </span>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-center">
+              <MiniFlag logo={game.logoCasa} alt={game.casa} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
+              <span className="text-white/30 text-xs mx-0.5">vs</span>
+              <MiniFlag logo={game.logoFora} alt={game.fora} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 text-white/45">
+              <Pencil size={14} />
+              <ChevronRight size={16} />
+            </div>
+          </button>
+        ) : (
+          <PalpiteCtaButton
+            onClick={onAction}
+            className="w-[calc(100%-2rem)] mx-4 mb-4"
+          >
+            Enviar Palpite
+          </PalpiteCtaButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function PalpiteDeadlineBanner() {
+  return (
+    <div className="frosted-banner">
+      <div className="frosted-banner__blur" aria-hidden />
+      <div className="frosted-banner__glass" aria-hidden />
+
+      <div className="frosted-banner__content flex items-center gap-3 px-4 py-3">
+        <p className="flex-1 text-xs text-amber-100/85 leading-relaxed">
+          Os palpites se encerram 5 minutos antes de cada jogo.
+        </p>
+        <div className="shrink-0 flex flex-col items-center justify-center px-2.5 py-1 rounded-xl frosted-card-inner bg-amber-500/12 border-amber-400/25 min-w-[52px]">
+          <span className="text-lg font-bold text-amber-300 leading-none">5</span>
+          <span className="text-[9px] text-amber-200/70 uppercase">minutos</span>
+        </div>
+      </div>
+    </div>
+  );
+}

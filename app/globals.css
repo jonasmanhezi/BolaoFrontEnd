@@ -1,26 +1,360 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #111111;
+  --card-foreground: #ededed;
+  --popover: #111111;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --secondary: #222222;
+  --secondary-foreground: #ededed;
+  --muted: #222222;
+  --muted-foreground: #a1a1aa;
+  --accent: #222222;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ededed;
+  --border: #222222;
+  --input: #222222;
+  --ring: #52525b;
+  --radius: 0.625rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans);
+}
+
+.glass {
+  @apply relative bg-white/[0.03] backdrop-blur-xl border border-white/5;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.glass::before {
+  content: '';
+  @apply absolute inset-0 rounded-[inherit] bg-linear-to-b from-white/5 to-transparent pointer-events-none;
+}
+
+.glass::after {
+  content: '';
+  @apply absolute inset-px rounded-[calc(1rem-1px)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)] pointer-events-none;
+}
+
+.glass-dark {
+  @apply relative bg-black/25 backdrop-blur-2xl border border-white/10 text-white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.glass-dark::before {
+  content: '';
+  @apply absolute inset-0 rounded-[inherit] bg-linear-to-b from-white/15 to-transparent pointer-events-none;
+}
+
+.glass-button {
+  @apply relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl 
+         text-sm font-medium transition-all duration-300 ease-out cursor-pointer
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 
+         disabled:pointer-events-none disabled:opacity-50
+         hover:scale-105 active:scale-95;
+}
+
+.glass-button-default {
+  @apply bg-white/20 backdrop-blur-xl border border-white/30 text-white
+         shadow-[0_4px_16px_rgba(0,0,0,0.2)];
+}
+
+.glass-button-default:hover {
+  @apply bg-white/30 border-white/40;
+}
+
+.glass-button-default::before {
+  content: '';
+  @apply absolute inset-0 rounded-[inherit] bg-linear-to-b from-white/20 to-transparent pointer-events-none;
+}
+
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.bolao-splash-bg {
+  background: linear-gradient(
+    155deg,
+    #ffdf01 0%,
+    #f0e38a 14%,
+    #7be8c8 29%,
+    #3fc9b2 46%,
+    #2a8a9e 57%,
+    #275e77 74%,
+    #1c4455 100%
+  );
+}
+
+.bolao-splash-highlight {
+  background: radial-gradient(
+    ellipse at 38% 22%,
+    rgba(255, 255, 255, 0.13) 0%,
+    rgba(255, 255, 255, 0.04) 32%,
+    transparent 60%
+  );
+}
+
+.bolao-back-bg {
+  background-color: #1c4455;
+  background-image: url('/back.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.app-bg {
+  background: #0a0f14;
+}
+
+.app-bg-tinted {
+  background: 
+    linear-gradient(160deg, rgba(39, 94, 119, 0.18) 0%, transparent 38%, transparent 62%, rgba(1, 250, 189, 0.06) 100%),
+    #0a0f14;
+}
+
+.bolao-app-bg {
+  background:
+    radial-gradient(
+      ellipse at 36% 18%,
+      rgba(255, 255, 255, 0.045) 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(255, 223, 1, 0.095) 0%,
+      rgba(240, 227, 138, 0.08) 14%,
+      rgba(123, 232, 200, 0.18) 29%,
+      rgba(63, 201, 178, 0.15) 46%,
+      rgba(42, 138, 158, 0.20) 57%,
+      rgba(39, 94, 119, 0.27) 74%,
+      rgba(28, 68, 85, 0.16) 100%
+    ),
+    #0a0f18;
+}
+
+.bolao-app-bg .glass {
+  background-color: rgba(255, 255, 255, 0.014) !important;
+}
+.bolao-app-bg .glass-dark {
+  background-color: rgba(0, 0, 0, 0.22) !important;
+}
+
+.bolao-palpites-bg {
+  background-color: #0e1238;
+  background-image: linear-gradient(
+    180deg,
+    #080b22 0%,
+    #0e1238 8%,
+    #121742 18%,
+    #1a247d 52%,
+    #1a247d 68%,
+    #182060 78%,
+    #1a2568 86%,
+    #1c2a72 93%,
+    #1e2f7a 100%
+  );
+}
+
+.bolao-palpites-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(40, 48, 95, 0.14) 0%, transparent 42%),
+    radial-gradient(circle at 82% 38%, rgba(30, 38, 85, 0.1) 0%, transparent 38%),
+    radial-gradient(circle at 55% 88%, rgba(22, 28, 68, 0.16) 0%, transparent 40%);
+}
+
+.liquid-glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.32);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.liquid-glass-emerald {
+  background: linear-gradient(
+    145deg,
+    rgba(52, 211, 153, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(16, 185, 129, 0.08) 100%
+  );
+  border-color: rgba(110, 231, 183, 0.22);
+  border-top-color: rgba(167, 243, 208, 0.35);
+}
+
+.liquid-glass-inner {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.liquid-glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.liquid-glass-pill-active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.frosted-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.frosted-card__blur {
+  position: absolute;
+  inset: -24px;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 25% 15%, rgba(65, 78, 145, 0.32) 0%, transparent 55%),
+    radial-gradient(circle at 75% 85%, rgba(26, 36, 125, 0.38) 0%, transparent 55%),
+    linear-gradient(165deg, #1a247d 0%, #1b2569 50%, #1a247d 100%);
+  filter: blur(28px) saturate(0.82);
+  transform: scale(1.08);
+  pointer-events: none;
+}
+
+.frosted-card__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(20px) saturate(108%);
+  -webkit-backdrop-filter: blur(20px) saturate(108%);
+  pointer-events: none;
+}
+
+.frosted-card__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.frosted-card__content {
+  position: relative;
+  z-index: 3;
+}
+
+.frosted-card-inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(105%);
+  -webkit-backdrop-filter: blur(16px) saturate(105%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.frosted-banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(251, 191, 36, 0.32);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+}
+
+.frosted-banner__blur {
+  position: absolute;
+  inset: -16px;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(210, 170, 90, 0.18) 0%, transparent 60%),
+    linear-gradient(135deg, #1a247d, #1a247d);
+  filter: blur(20px) saturate(0.85);
+  transform: scale(1.06);
+  pointer-events: none;
+}
+
+.frosted-banner__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  pointer-events: none;
+}
+
+.frosted-banner__content {
+  position: relative;
+  z-index: 2;
+}
+
+.palpite-modal-inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: rgba(10, 14, 38, 0.32);
+  backdrop-filter: blur(16px) saturate(85%);
+  -webkit-backdrop-filter: blur(16px) saturate(85%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.palpite-modal-sheet {
+  background-color: #080b22;
+  background-image: linear-gradient(
+    180deg,
+    #050716 0%,
+    #080b22 12%,
+    #0a0e28 40%,
+    #0c1030 72%,
+    #0e1238 100%
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -16px 56px rgba(0, 0, 0, 0.55);
 }

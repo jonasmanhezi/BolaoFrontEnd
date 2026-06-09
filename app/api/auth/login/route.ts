@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { decodeCredential } from '@/lib/auth-credentials';
-
-const BACKEND_BASE = process.env.BACKEND_URL ?? 'http://localhost:8080';
+import { getBackendUrl } from '@/lib/backend-url';
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +14,7 @@ export async function POST(request: Request) {
 
     const senha = decodeCredential(String(credential));
 
-    const res = await fetch(`${BACKEND_BASE}/auth/login`, {
+    const res = await fetch(`${getBackendUrl()}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha }),

@@ -1,5 +1,6 @@
-const BACKEND_BASE =
-  typeof window !== 'undefined' ? '/api/backend/v1' : 'http://localhost:8080/v1';
+import { getBackendApiBase } from '@/lib/backend-url';
+
+const BACKEND_BASE = getBackendApiBase();
 export const CAMPEONATO_ID = 1;
 export const FASE_ID = 1;
 const PAGE_SIZE = 50;

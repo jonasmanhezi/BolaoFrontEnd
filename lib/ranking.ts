@@ -1,5 +1,6 @@
-const BACKEND_BASE =
-  typeof window !== 'undefined' ? '/api/backend/v1' : 'http://localhost:8080/v1';
+import { getBackendApiBase } from '@/lib/backend-url';
+
+const BACKEND_BASE = getBackendApiBase();
 
 export interface RankingEntry {
   posicao: number;

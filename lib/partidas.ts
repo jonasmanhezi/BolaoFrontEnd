@@ -21,8 +21,9 @@ export interface Partida {
   faseId?: number;
 }
 
-const BACKEND_BASE =
-  typeof window !== 'undefined' ? '/api/backend/v1' : 'http://localhost:8080/v1';
+import { getBackendApiBase } from '@/lib/backend-url';
+
+const BACKEND_BASE = getBackendApiBase();
 
 let allMatchesCache: Partida[] | null = null;
 let inFlightRequest: Promise<Partida[]> | null = null;

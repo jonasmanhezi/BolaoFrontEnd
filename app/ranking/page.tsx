@@ -18,7 +18,9 @@ export default function RankingPage() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUserId] = useState<number | null>(() =>
+    typeof window !== 'undefined' ? getUserIdFromStorage() : null
+  );
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { podium, rest, leader } = splitRanking(ranking);
@@ -29,8 +31,6 @@ export default function RankingPage() {
       router.replace('/login');
       return;
     }
-
-    setCurrentUserId(getUserIdFromStorage());
 
     let cancelled = false;
 

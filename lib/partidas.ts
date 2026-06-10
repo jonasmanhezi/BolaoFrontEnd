@@ -21,6 +21,22 @@ export interface Partida {
   faseId?: number;
 }
 
+interface RawPartida {
+  id: number;
+  timeCasaId?: number;
+  timeVisitanteId?: number;
+  dataHoraPartida?: string;
+  nomeCasa?: string;
+  nomeVisitante?: string;
+  logoCasa?: string;
+  logoFora?: string;
+  golsCasa?: number | null;
+  golsVisitante?: number | null;
+  status?: string;
+  campeonatoId?: number;
+  faseId?: number;
+}
+
 import { getBackendApiBase } from '@/lib/backend-url';
 
 const BACKEND_BASE = getBackendApiBase();
@@ -124,11 +140,11 @@ export async function getAllPartidas(): Promise<Partida[]> {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const raw: any[] = await res.json();
+      const raw: RawPartida[] = await res.json();
       const mapped: Partida[] = raw.map((p) => {
         const casaInfo = getTeamInfo(p.timeCasaId);
         const foraInfo = getTeamInfo(p.timeVisitanteId);
-        const { data, horario } = formatDataHora(p.dataHoraPartida);
+        const { data, horario } = formatDataHora(p.dataHoraPartida ?? null);
 
         const casa = p.nomeCasa || casaInfo.name;
         const fora = p.nomeVisitante || foraInfo.name;
@@ -204,7 +220,7 @@ function getMockAllPartidas(): Partida[] {
 
 export function generateBrazilDates(startDateStr: string, count: number): string[] {
   const dates: string[] = [];
-  let current = new Date(startDateStr + 'T12:00:00Z');
+  const current = new Date(startDateStr + 'T12:00:00Z');
   for (let i = 0; i < count; i++) {
     const brDate = current.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
     dates.push(brDate);

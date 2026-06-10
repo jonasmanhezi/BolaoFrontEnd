@@ -241,9 +241,10 @@ export default function PalpitesPage() {
       }));
 
       await buscarPalpites(allPartidas);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      alert('Erro ao salvar palpite: ' + (e.message || 'verifique o backend e se a partida existe'));
+      const message = e instanceof Error ? e.message : 'verifique o backend e se a partida existe';
+      alert('Erro ao salvar palpite: ' + message);
     } finally {
       closeModal();
     }

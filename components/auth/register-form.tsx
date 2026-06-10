@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthSubmitButton } from '@/components/auth/auth-submit-button';
-import { UnderlineField } from '@/components/auth/underline-field';
+import { GlassField } from '@/components/auth/glass-field';
+import { GlassButton } from '@/components/ui/glass-button';
 import { persistAuthSession, registerAccount } from '@/lib/auth-api';
 
 interface RegisterFormProps {
@@ -46,8 +46,8 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
   };
 
   return (
-    <form onSubmit={handleRegister} className="space-y-5">
-      <UnderlineField
+    <form onSubmit={handleRegister} className="space-y-4">
+      <GlassField
         id={`${idPrefix}-nome`}
         label="Nome"
         value={nome}
@@ -57,7 +57,7 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
         autoComplete="name"
       />
 
-      <UnderlineField
+      <GlassField
         id={`${idPrefix}-email`}
         label="Email"
         type="email"
@@ -68,7 +68,7 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
         autoComplete="email"
       />
 
-      <UnderlineField
+      <GlassField
         id={`${idPrefix}-senha`}
         label="Senha"
         type="password"
@@ -80,11 +80,23 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
         autoComplete="new-password"
       />
 
-      {error && <p className="text-red-300/90 text-sm text-center">{error}</p>}
+      {error && (
+        <p className="text-red-100/95 text-sm text-center px-2 leading-relaxed">{error}</p>
+      )}
 
-      <AuthSubmitButton disabled={loading}>
-        {loading ? 'Criando conta...' : 'Criar conta'}
-      </AuthSubmitButton>
+      <div className="pt-2">
+        <GlassButton
+          type="submit"
+          variant="emerald"
+          size="lg"
+          glowEffect
+          fullWidth
+          disabled={loading}
+          className="w-full h-12 rounded-2xl text-base font-semibold tracking-wide"
+        >
+          {loading ? 'Criando conta...' : 'Criar conta'}
+        </GlassButton>
+      </div>
     </form>
   );
 }

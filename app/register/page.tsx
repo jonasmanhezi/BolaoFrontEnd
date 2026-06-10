@@ -1,26 +1,27 @@
 "use client";
 
-import { AuthGlassPanel } from '@/components/auth/auth-glass-panel';
+import Link from 'next/link';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { RegisterForm } from '@/components/auth/register-form';
 
 export default function RegisterPage() {
   return (
-    <AuthShell>
-      <AuthGlassPanel>
-        <div className="text-center mb-6">
-          <h1 className="text-xl font-bold tracking-tight">Criar Conta</h1>
-          <p className="text-white/80 mt-1 text-sm">Junte-se ao Bolão da Copa 2026</p>
-        </div>
+    <AuthShell variant="splash">
+      <div className="auth-login-logo-area">
+        <img
+          src="/fifa.png"
+          alt="Copa do Mundo 2026"
+          className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+        />
+      </div>
 
-        <RegisterForm idPrefix="register-page" />
-      </AuthGlassPanel>
+      <RegisterForm idPrefix="register-page" />
 
-      <div className="text-center mt-5 text-sm text-white/55">
+      <div className="text-center mt-6 text-sm text-white/80">
         Já tem conta?{' '}
-        <a href="/login" className="text-white hover:underline">
+        <Link href="/login" className="text-white font-medium hover:underline underline-offset-4">
           Entrar
-        </a>
+        </Link>
       </div>
     </AuthShell>
   );

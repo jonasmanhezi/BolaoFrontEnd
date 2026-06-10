@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthShell } from '@/components/auth/auth-shell';
-import { AuthSubmitButton } from '@/components/auth/auth-submit-button';
+import { GlassField } from '@/components/auth/glass-field';
 import { RegisterSheet } from '@/components/auth/register-sheet';
-import { UnderlineField } from '@/components/auth/underline-field';
+import { GlassButton } from '@/components/ui/glass-button';
 import { loginWithCredentials, persistAuthSession } from '@/lib/auth-api';
 
 export default function LoginPage() {
@@ -42,9 +42,17 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthShell>
-      <form onSubmit={handleLogin} className="space-y-5">
-        <UnderlineField
+    <AuthShell variant="splash">
+      <div className="auth-login-logo-area">
+        <img
+          src="/fifa.png"
+          alt="Copa do Mundo 2026"
+          className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+        />
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-4">
+        <GlassField
           id="login-email"
           label="Email"
           type="email"
@@ -55,7 +63,7 @@ export default function LoginPage() {
           autoComplete="email"
         />
 
-        <UnderlineField
+        <GlassField
           id="login-senha"
           label="Senha"
           type="password"
@@ -66,19 +74,31 @@ export default function LoginPage() {
           autoComplete="current-password"
         />
 
-        {error && <p className="text-red-300/90 text-sm text-center">{error}</p>}
+        {error && (
+          <p className="text-red-100/95 text-sm text-center px-2 leading-relaxed">{error}</p>
+        )}
 
-        <AuthSubmitButton disabled={loading}>
-          {loading ? 'Entrando...' : 'Entrar'}
-        </AuthSubmitButton>
+        <div className="pt-2">
+          <GlassButton
+            type="submit"
+            variant="emerald"
+            size="lg"
+            glowEffect
+            fullWidth
+            disabled={loading}
+            className="w-full h-12 rounded-2xl text-base font-semibold tracking-wide"
+          >
+            {loading ? 'Entrando...' : 'Logar'}
+          </GlassButton>
+        </div>
       </form>
 
-      <div className="text-center mt-5 text-sm text-white/55">
+      <div className="text-center mt-6 text-sm text-white/80">
         Ainda não tem conta?{' '}
         <button
           type="button"
           onClick={() => setRegisterOpen(true)}
-          className="text-white hover:underline"
+          className="text-white font-semibold hover:underline underline-offset-4"
         >
           Crie uma agora
         </button>

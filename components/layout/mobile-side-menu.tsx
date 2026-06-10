@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Trophy, User, LogOut, X } from 'lucide-react';
+import { BookOpen, History, Home, Trophy, LogOut, X } from 'lucide-react';
 
 interface MobileSideMenuProps {
   open: boolean;
@@ -13,7 +13,8 @@ interface MobileSideMenuProps {
 const navItems = [
   { href: '/palpites', label: 'Palpites', icon: Home },
   { href: '/ranking', label: 'Ranking', icon: Trophy },
-  { href: '/profile', label: 'Perfil', icon: User },
+  { href: '/historico', label: 'Histórico', icon: History },
+  { href: '/regras', label: 'Regras', icon: BookOpen },
 ];
 
 export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {

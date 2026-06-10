@@ -218,6 +218,9 @@ function getMockAllPartidas(): Partida[] {
   return mock;
 }
 
+export const CALENDAR_START_DATE = '2026-06-11';
+export const CALENDAR_END_DATE = '2026-07-27';
+
 export function generateBrazilDates(startDateStr: string, count: number): string[] {
   const dates: string[] = [];
   const current = new Date(startDateStr + 'T12:00:00Z');
@@ -226,6 +229,19 @@ export function generateBrazilDates(startDateStr: string, count: number): string
     dates.push(brDate);
     current.setUTCDate(current.getUTCDate() + 1);
   }
+  return dates;
+}
+
+export function generateBrazilDateRange(startDateStr: string, endDateStr: string): string[] {
+  const dates: string[] = [];
+  const current = new Date(startDateStr + 'T12:00:00Z');
+  const end = new Date(endDateStr + 'T12:00:00Z');
+
+  while (current <= end) {
+    dates.push(current.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+
   return dates;
 }
 

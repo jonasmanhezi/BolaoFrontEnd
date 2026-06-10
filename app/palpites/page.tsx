@@ -8,6 +8,7 @@ import { PalpiteCtaButton } from '@/components/match/palpite-cta-button';
 import { ScoreStepper } from '@/components/match/score-stepper';
 import { formatDateLong } from '@/lib/match-time';
 import { CalendarDays } from 'lucide-react';
+import { toast } from 'sonner';
 import { AppMobileHeader } from '@/components/layout/app-mobile-header';
 import { MobileSideMenu } from '@/components/layout/mobile-side-menu';
 import {
@@ -15,7 +16,9 @@ import {
   getAllPartidas,
   getLastDataSource,
   clearPartidasCache,
-  generateBrazilDates,
+  CALENDAR_END_DATE,
+  CALENDAR_START_DATE,
+  generateBrazilDateRange,
 } from '@/lib/partidas';
 import {
   partidaTemResultado,
@@ -32,7 +35,7 @@ import {
 export default function PalpitesPage() {
   const router = useRouter();
 
-  const calendarDates = generateBrazilDates('2026-06-11', 10);
+  const calendarDates = generateBrazilDateRange(CALENDAR_START_DATE, CALENDAR_END_DATE);
 
   const [selectedDate, setSelectedDate] = useState(calendarDates[0]);
   const [allPartidas, setAllPartidas] = useState<Partida[]>([]);
@@ -215,7 +218,7 @@ export default function PalpitesPage() {
   const submitPalpiteFromModal = async () => {
     if (!selectedGame) return;
     if (!modalGolsCasa || !modalGolsFora) {
-      alert('Preencha os dois placares!');
+      toast.error('Preencha os dois placares!');
       return;
     }
 
@@ -240,11 +243,16 @@ export default function PalpitesPage() {
         },
       }));
 
+      const isEdicao = !!palpiteExistente?.id;
+      toast.success(isEdicao ? 'Palpite atualizado!' : 'Palpite enviado!', {
+        description: `${selectedGame.casa} ${golsCasaNum} × ${golsForaNum} ${selectedGame.fora}`,
+      });
+
       await buscarPalpites(allPartidas);
     } catch (e: unknown) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'verifique o backend e se a partida existe';
-      alert('Erro ao salvar palpite: ' + message);
+      toast.error('Erro ao salvar palpite', { description: message });
     } finally {
       closeModal();
     }

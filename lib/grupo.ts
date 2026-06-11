@@ -1,5 +1,6 @@
 import { getBackendApiBase } from '@/lib/backend-url';
 import { getAuthHeaders } from '@/lib/api-headers';
+import { apiFetch } from '@/lib/api-fetch';
 
 export interface Grupo {
   id: number;
@@ -75,7 +76,7 @@ function normalizeGrupo(raw: unknown): Grupo | null {
 }
 
 export async function entrarNoGrupo(codigo: string): Promise<Grupo> {
-  const res = await fetch(`${getBackendApiBase()}/grupos/entrar`, {
+  const res = await apiFetch(`${getBackendApiBase()}/grupos/entrar`, {
     method: 'POST',
     headers: {
       ...getAuthHeaders(false),
@@ -99,7 +100,7 @@ export async function entrarNoGrupo(codigo: string): Promise<Grupo> {
 }
 
 export async function listarMeusGrupos(): Promise<Grupo[]> {
-  const res = await fetch(`${getBackendApiBase()}/grupos/meus`, {
+  const res = await apiFetch(`${getBackendApiBase()}/grupos/meus`, {
     headers: getAuthHeaders(false),
   });
 

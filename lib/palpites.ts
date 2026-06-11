@@ -1,5 +1,6 @@
 import { getBackendApiBase } from '@/lib/backend-url';
 import { getAuthHeaders } from '@/lib/api-headers';
+import { apiFetch } from '@/lib/api-fetch';
 import { getCampeonatoIdFromStorage } from '@/lib/grupo';
 
 export const FASE_ID = 1;
@@ -94,14 +95,10 @@ export async function getPalpitesPaginados(
   page: number = 0,
   size: number = PAGE_SIZE
 ): Promise<PaginatedPalpiteResponse> {
-  const res = await fetch(
+  const res = await apiFetch(
     `${getBackendApiBase()}/palpites/usuario/${usuarioId}/campeonato/${getCampeonatoId()}/fase/${faseId}?page=${page}&size=${size}`,
     { headers: getAuthHeaders() }
   );
-
-  if (res.status === 401) {
-    throw new Error('Sessão expirada. Faça login novamente.');
-  }
 
   if (res.status === 403) {
     throw new Error(await parseErrorResponse(res, 'Acesso negado ao consultar palpites.'));
@@ -134,14 +131,10 @@ export async function getPalpitesPaginados(
 }
 
 export async function getPalpitesPorCampeonatoFase(faseId: number = FASE_ID): Promise<Palpite[]> {
-  const res = await fetch(
+  const res = await apiFetch(
     `${getBackendApiBase()}/palpites/campeonato/${getCampeonatoId()}/fase/${faseId}`,
     { headers: getAuthHeaders() }
   );
-
-  if (res.status === 401) {
-    throw new Error('Sessão expirada. Faça login novamente.');
-  }
 
   if (!res.ok) {
     throw new Error(await parseErrorResponse(res, `Erro ao buscar palpites (HTTP ${res.status})`));
@@ -188,7 +181,7 @@ export async function atualizarPalpite(
   golsCasa: number,
   golsVisitante: number
 ): Promise<Palpite> {
-  const res = await fetch(`${getBackendApiBase()}/palpites/${palpiteId}`, {
+  const res = await apiFetch(`${getBackendApiBase()}/palpites/${palpiteId}`, {
     method: 'PUT',
     headers: {
       ...getAuthHeaders(),
@@ -215,7 +208,7 @@ export async function criarOuAtualizarPalpite(
     return atualizarPalpite(palpiteId, golsCasa, golsVisitante);
   }
 
-  const res = await fetch(`${getBackendApiBase()}/palpites`, {
+  const res = await apiFetch(`${getBackendApiBase()}/palpites`, {
     method: 'POST',
     headers: {
       ...getAuthHeaders(),

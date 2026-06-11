@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, History, Home, Trophy, LogOut, X } from 'lucide-react';
-import { clearGrupoSession, getGrupoNomeFromStorage } from '@/lib/grupo';
+import { getGrupoNomeFromStorage } from '@/lib/grupo';
+import { redirectToLogin } from '@/lib/auth-session';
 
 interface MobileSideMenuProps {
   open: boolean;
@@ -35,11 +36,7 @@ export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
-    clearGrupoSession();
-    window.location.href = '/login';
+    redirectToLogin();
   };
 
   return (

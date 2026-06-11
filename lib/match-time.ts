@@ -2,13 +2,41 @@ import type { Partida } from '@/lib/partidas';
 
 export const BRAZIL_TIMEZONE = 'America/Sao_Paulo';
 
+const NAIVE_ISO_RE =
+  /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
+const HAS_OFFSET_RE = /(?:[zZ]|[+\-]\d{2}:?\d{2})$/;
+
+function formatInstantToBrazil(date: Date): { data: string; horario: string } {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: BRAZIL_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? '00';
+
+  return {
+    data: `${get('year')}-${get('month')}-${get('day')}`,
+    horario: `${get('hour')}:${get('minute')}`,
+  };
+}
+
 /** Converte ISO do backend (LocalDateTime ou com offset) para instante absoluto. */
 export function parseDataHoraPartida(raw: string): Date {
   const trimmed = raw.trim();
-  const hasOffset = /[zZ]|[+\-]\d{2}:?\d{2}$/.test(trimmed);
 
-  if (hasOffset) {
+  if (HAS_OFFSET_RE.test(trimmed)) {
     return new Date(trimmed);
+  }
+
+  const naive = trimmed.match(NAIVE_ISO_RE);
+  if (naive) {
+    return new Date(`${naive[1]}T${naive[2]}:${naive[3]}:00-03:00`);
   }
 
   const normalized = trimmed.length === 16 ? `${trimmed}:00` : trimmed;
@@ -23,23 +51,19 @@ export function parsePartidaKickoff(data: string, horario: string): Date {
 export function formatPartidaDataHora(raw: string | null): { data: string; horario: string } {
   if (!raw) return { data: '', horario: '' };
 
-  const dateForBr = parseDataHoraPartida(raw);
+  const trimmed = raw.trim();
 
-  const data = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: BRAZIL_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(dateForBr);
+  if (!HAS_OFFSET_RE.test(trimmed)) {
+    const naive = trimmed.match(NAIVE_ISO_RE);
+    if (naive) {
+      return {
+        data: naive[1],
+        horario: `${naive[2]}:${naive[3]}`,
+      };
+    }
+  }
 
-  const horario = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: BRAZIL_TIMEZONE,
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).format(dateForBr);
-
-  return { data, horario };
+  return formatInstantToBrazil(parseDataHoraPartida(trimmed));
 }
 
 export function formatDateLong(dateStr: string): string {

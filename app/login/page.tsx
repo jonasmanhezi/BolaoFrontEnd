@@ -3,22 +3,23 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { GlassField } from '@/components/auth/glass-field';
 import { GlassButton } from '@/components/ui/glass-button';
 import { loginWithCredentials, persistAuthSession } from '@/lib/auth-api';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
+import { hasGrupoSession } from '@/lib/grupo';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const senhaAtual = senha;
     setSenha('');
@@ -28,13 +29,16 @@ export default function LoginPage() {
 
       if (data.token) {
         persistAuthSession(data);
-        router.push('/palpites');
+        router.push(hasGrupoSession() ? '/palpites' : '/entrar-grupo');
       } else {
-        setError('Conta criada! Verifique seu email para confirmar e depois faça login.');
+        toast.success('Verifique seu email para confirmar a conta antes de fazer login.');
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro ao fazer login';
-      setError(message);
+      const message =
+        err instanceof Error
+          ? getAuthErrorMessage(err.message, 'login')
+          : getAuthErrorMessage(undefined, 'login');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -72,10 +76,6 @@ export default function LoginPage() {
           required
           autoComplete="current-password"
         />
-
-        {error && (
-          <p className="text-red-100/95 text-sm text-center px-2 leading-relaxed">{error}</p>
-        )}
 
         <div className="pt-2">
           <GlassButton

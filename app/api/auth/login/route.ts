@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { decodeCredential } from '@/lib/auth-credentials';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
 import { getBackendUrl } from '@/lib/backend-url';
 
 export async function POST(request: Request) {
@@ -24,7 +25,13 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { message: (data as { message?: string }).message || 'Email ou senha incorretos' },
+        {
+          message: getAuthErrorMessage(
+            (data as { message?: string }).message,
+            'login',
+            res.status
+          ),
+        },
         { status: res.status }
       );
     }

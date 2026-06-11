@@ -11,6 +11,7 @@ import { FrostedCard } from '@/components/ui/frosted-card';
 import { formatDateLong } from '@/lib/match-time';
 import { getAllPartidas, type Partida } from '@/lib/partidas';
 import { getPalpitesDoUsuario, type Palpite } from '@/lib/palpites';
+import { hasGrupoSession } from '@/lib/grupo';
 
 interface HistoricoItem {
   palpite: Palpite;
@@ -69,6 +70,11 @@ export default function HistoricoPage() {
     const token = localStorage.getItem('token');
     if (!token) {
       router.replace('/login');
+      return;
+    }
+
+    if (!hasGrupoSession()) {
+      router.replace('/entrar-grupo');
       return;
     }
 

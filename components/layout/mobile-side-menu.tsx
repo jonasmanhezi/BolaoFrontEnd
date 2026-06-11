@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, History, Home, Trophy, LogOut, X } from 'lucide-react';
+import { clearGrupoSession, getGrupoNomeFromStorage } from '@/lib/grupo';
 
 interface MobileSideMenuProps {
   open: boolean;
@@ -27,10 +28,13 @@ export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
     };
   }, [open]);
 
+  const grupoNome = getGrupoNomeFromStorage();
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userName');
+    clearGrupoSession();
     window.location.href = '/login';
   };
 
@@ -51,7 +55,12 @@ export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <img src="/fifa.png" alt="Copa do Mundo" className="h-10 w-auto object-contain" />
+          <div className="min-w-0">
+            <img src="/fifa.png" alt="Copa do Mundo" className="h-10 w-auto object-contain" />
+            {grupoNome && (
+              <p className="text-[11px] text-white/50 mt-1 truncate">{grupoNome}</p>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}

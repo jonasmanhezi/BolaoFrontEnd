@@ -1,4 +1,5 @@
 import { encodeCredential } from '@/lib/auth-credentials';
+import { getAuthErrorMessage, type AuthErrorContext } from '@/lib/auth-errors';
 
 export interface AuthResult {
   token?: string;
@@ -7,10 +8,15 @@ export interface AuthResult {
   email?: string;
 }
 
-async function parseAuthResponse(res: Response): Promise<AuthResult> {
+async function parseAuthResponse(
+  res: Response,
+  context: AuthErrorContext
+): Promise<AuthResult> {
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error((data as { message?: string }).message || `Erro na autenticação (${res.status})`);
+    throw new Error(
+      getAuthErrorMessage((data as { message?: string }).message, context, res.status)
+    );
   }
   return res.json();
 }
@@ -25,7 +31,7 @@ export async function loginWithCredentials(email: string, senha: string): Promis
     }),
   });
 
-  return parseAuthResponse(res);
+  return parseAuthResponse(res, 'login');
 }
 
 export async function registerAccount(
@@ -43,7 +49,7 @@ export async function registerAccount(
     }),
   });
 
-  return parseAuthResponse(res);
+  return parseAuthResponse(res, 'register');
 }
 
 export function persistAuthSession(data: AuthResult): void {

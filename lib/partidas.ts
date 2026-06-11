@@ -40,8 +40,6 @@ interface RawPartida {
 
 import { getBackendApiBase } from '@/lib/backend-url';
 
-const BACKEND_BASE = getBackendApiBase();
-
 let allMatchesCache: Partida[] | null = null;
 let inFlightRequest: Promise<Partida[]> | null = null;
 let lastSource: 'backend' | 'mock' = 'mock';
@@ -97,7 +95,7 @@ export async function getAllPartidas(): Promise<Partida[]> {
   inFlightRequest = (async () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const res = await fetch(`${BACKEND_BASE}/partidas`, {
+      const res = await fetch(`${getBackendApiBase()}/partidas`, {
         headers: {
           'Accept': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -187,25 +185,34 @@ function getMockAllPartidas(): Partida[] {
 export const CALENDAR_START_DATE = '2026-06-11';
 export const CALENDAR_END_DATE = '2026-06-27';
 
+function addDaysToDateString(dateStr: string, days: number): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + days));
+  const y = next.getUTCFullYear();
+  const m = String(next.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(next.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function generateBrazilDates(startDateStr: string, count: number): string[] {
   const dates: string[] = [];
-  const current = new Date(startDateStr + 'T12:00:00Z');
+  let current = startDateStr;
+
   for (let i = 0; i < count; i++) {
-    const brDate = current.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
-    dates.push(brDate);
-    current.setUTCDate(current.getUTCDate() + 1);
+    dates.push(current);
+    current = addDaysToDateString(current, 1);
   }
+
   return dates;
 }
 
 export function generateBrazilDateRange(startDateStr: string, endDateStr: string): string[] {
   const dates: string[] = [];
-  const current = new Date(startDateStr + 'T12:00:00Z');
-  const end = new Date(endDateStr + 'T12:00:00Z');
+  let current = startDateStr;
 
-  while (current <= end) {
-    dates.push(current.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }));
-    current.setUTCDate(current.getUTCDate() + 1);
+  while (current <= endDateStr) {
+    dates.push(current);
+    current = addDaysToDateString(current, 1);
   }
 
   return dates;

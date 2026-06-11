@@ -1,8 +1,12 @@
 import { getBackendApiBase } from '@/lib/backend-url';
+import { getAuthHeaders } from '@/lib/api-headers';
+import { getCampeonatoIdFromStorage } from '@/lib/grupo';
 
-const BACKEND_BASE = getBackendApiBase();
-export const CAMPEONATO_ID = 1;
 export const FASE_ID = 1;
+
+export function getCampeonatoId(): number {
+  return getCampeonatoIdFromStorage();
+}
 const PAGE_SIZE = 50;
 
 export interface Palpite {
@@ -25,18 +29,6 @@ export interface PaginatedPalpiteResponse {
   size: number;
   totalElements: number;
   totalPages: number;
-}
-
-function getAuthHeaders(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  if (!token) {
-    throw new Error('Token ausente. Faça login novamente.');
-  }
-
-  return {
-    Accept: 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
 }
 
 export function getUserIdFromStorage(): number | null {
@@ -103,7 +95,7 @@ export async function getPalpitesPaginados(
   size: number = PAGE_SIZE
 ): Promise<PaginatedPalpiteResponse> {
   const res = await fetch(
-    `${BACKEND_BASE}/palpites/usuario/${usuarioId}/campeonato/${CAMPEONATO_ID}/fase/${faseId}?page=${page}&size=${size}`,
+    `${getBackendApiBase()}/palpites/usuario/${usuarioId}/campeonato/${getCampeonatoId()}/fase/${faseId}?page=${page}&size=${size}`,
     { headers: getAuthHeaders() }
   );
 
@@ -143,7 +135,7 @@ export async function getPalpitesPaginados(
 
 export async function getPalpitesPorCampeonatoFase(faseId: number = FASE_ID): Promise<Palpite[]> {
   const res = await fetch(
-    `${BACKEND_BASE}/palpites/campeonato/${CAMPEONATO_ID}/fase/${faseId}`,
+    `${getBackendApiBase()}/palpites/campeonato/${getCampeonatoId()}/fase/${faseId}`,
     { headers: getAuthHeaders() }
   );
 
@@ -196,7 +188,7 @@ export async function atualizarPalpite(
   golsCasa: number,
   golsVisitante: number
 ): Promise<Palpite> {
-  const res = await fetch(`${BACKEND_BASE}/palpites/${palpiteId}`, {
+  const res = await fetch(`${getBackendApiBase()}/palpites/${palpiteId}`, {
     method: 'PUT',
     headers: {
       ...getAuthHeaders(),
@@ -223,13 +215,13 @@ export async function criarOuAtualizarPalpite(
     return atualizarPalpite(palpiteId, golsCasa, golsVisitante);
   }
 
-  const res = await fetch(`${BACKEND_BASE}/palpites`, {
+  const res = await fetch(`${getBackendApiBase()}/palpites`, {
     method: 'POST',
     headers: {
       ...getAuthHeaders(),
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: CAMPEONATO_ID }),
+    body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId() }),
   });
 
   if (!res.ok) {

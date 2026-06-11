@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { GlassField } from '@/components/auth/glass-field';
 import { GlassButton } from '@/components/ui/glass-button';
 import { persistAuthSession, registerAccount } from '@/lib/auth-api';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
+import { hasGrupoSession } from '@/lib/grupo';
 
 interface RegisterFormProps {
   idPrefix?: string;
@@ -16,12 +19,10 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const senhaAtual = senha;
     setSenha('');
@@ -31,15 +32,16 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
 
       if (data.token) {
         persistAuthSession(data);
-        router.push('/palpites');
+        router.push(hasGrupoSession() ? '/palpites' : '/entrar-grupo');
       } else {
-        setError(
-          'Conta criada com sucesso! Verifique seu email para confirmar a conta antes de fazer login.'
-        );
+        toast.success('Conta criada! Verifique seu email para confirmar antes de fazer login.');
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro ao criar conta';
-      setError(message);
+      const message =
+        err instanceof Error
+          ? getAuthErrorMessage(err.message, 'register')
+          : getAuthErrorMessage(undefined, 'register');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -79,10 +81,6 @@ export function RegisterForm({ idPrefix = 'register' }: RegisterFormProps) {
         minLength={6}
         autoComplete="new-password"
       />
-
-      {error && (
-        <p className="text-red-100/95 text-sm text-center px-2 leading-relaxed">{error}</p>
-      )}
 
       <div className="pt-2">
         <GlassButton

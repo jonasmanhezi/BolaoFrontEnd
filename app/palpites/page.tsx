@@ -29,6 +29,7 @@ import {
   findDateWithPalpite,
   type PalpiteLocal,
 } from '@/lib/palpites';
+import { hasGrupoSession } from '@/lib/grupo';
 
 export default function PalpitesPage() {
   const router = useRouter();
@@ -88,6 +89,11 @@ export default function PalpitesPage() {
     const token = localStorage.getItem('token');
     if (!token) {
       router.replace('/login');
+      return;
+    }
+
+    if (!hasGrupoSession()) {
+      router.replace('/entrar-grupo');
       return;
     }
 

@@ -1,6 +1,5 @@
 import { getBackendApiBase } from '@/lib/backend-url';
-
-const BACKEND_BASE = getBackendApiBase();
+import { getAuthHeaders } from '@/lib/api-headers';
 
 export interface RankingEntry {
   posicao: number;
@@ -31,9 +30,9 @@ function normalizeRankingEntry(raw: unknown): RankingEntry | null {
 }
 
 export async function getRanking(): Promise<RankingEntry[]> {
-  const res = await fetch(`${BACKEND_BASE}/ranking`, {
+  const res = await fetch(`${getBackendApiBase()}/ranking`, {
     method: 'GET',
-    headers: { Accept: 'application/json' },
+    headers: getAuthHeaders(),
     cache: 'no-store',
   });
 

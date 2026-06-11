@@ -12,6 +12,7 @@ import { RankingSkeleton } from '@/components/ranking/ranking-skeleton';
 import { RankingStatsBar } from '@/components/ranking/ranking-stats-bar';
 import { splitRanking } from '@/components/ranking/ranking-utils';
 import { getRanking, getUserIdFromStorage, type RankingEntry } from '@/lib/ranking';
+import { hasGrupoSession } from '@/lib/grupo';
 
 export default function RankingPage() {
   const router = useRouter();
@@ -29,6 +30,11 @@ export default function RankingPage() {
     const token = localStorage.getItem('token');
     if (!token) {
       router.replace('/login');
+      return;
+    }
+
+    if (!hasGrupoSession()) {
+      router.replace('/entrar-grupo');
       return;
     }
 

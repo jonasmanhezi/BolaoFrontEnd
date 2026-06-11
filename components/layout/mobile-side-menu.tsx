@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, History, Home, Trophy, LogOut, X } from 'lucide-react';
@@ -28,7 +28,11 @@ export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
     };
   }, [open]);
 
-  const grupoNome = getGrupoNomeFromStorage();
+  const [grupoNome, setGrupoNome] = useState<string | null>(null);
+
+  useEffect(() => {
+    setGrupoNome(getGrupoNomeFromStorage());
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

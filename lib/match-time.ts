@@ -68,14 +68,14 @@ export function formatDateLong(dateStr: string): string {
     .join(' ');
 }
 
-export function getKickoffCountdown(partida: Partida): string {
+export function getKickoffCountdown(partida: Partida, nowMs?: number): string {
   if (partida.status === 'EM_ANDAMENTO') return 'Ao vivo';
   if (partida.status === 'FINALIZADA') return 'Encerrado';
   if (partida.status === 'CANCELADA') return 'Cancelado';
   if (!partida.data || !partida.horario) return '';
 
   const kickoff = parsePartidaKickoff(partida.data, partida.horario);
-  const diffMs = kickoff.getTime() - Date.now();
+  const diffMs = kickoff.getTime() - (nowMs ?? Date.now());
 
   if (diffMs <= 0) return 'Em breve';
 

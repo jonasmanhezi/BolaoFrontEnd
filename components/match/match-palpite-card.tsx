@@ -1,11 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Check, ChevronRight, Clock, Pencil } from 'lucide-react';
 import { PalpiteCtaButton } from '@/components/match/palpite-cta-button';
 import type { Partida } from '@/lib/partidas';
 import { DEFAULT_TEAM_LOGO } from '@/lib/partidas';
 import { getKickoffCountdown } from '@/lib/match-time';
-import { partidaTemResultado, partidaAoVivo } from '@/lib/partida-status';
+import { partidaTemResultado, partidaAoVivo, palpiteAberto } from '@/lib/partida-status';
 import type { PalpiteLocal } from '@/lib/palpites';
 
 interface MatchPalpiteCardProps {
@@ -30,9 +31,22 @@ function MiniFlag({ logo, alt }: { logo: string; alt: string }) {
 }
 
 export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardProps) {
+  const [nowMs, setNowMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    const tick = () => setNowMs(Date.now());
+    tick();
+    const intervalId = window.setInterval(tick, 30_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   const hasPalpite = !!palpite && palpite.golsCasa !== '' && palpite.golsFora !== '';
-  const countdown = getKickoffCountdown(game);
   const showOfficialScore = partidaTemResultado(game);
+  const aberto =
+    nowMs == null
+      ? game.status === 'AGENDADA' || game.status == null
+      : palpiteAberto(game, nowMs);
+  const countdown = nowMs == null ? '' : getKickoffCountdown(game, nowMs);
 
   return (
     <div className="frosted-card">
@@ -122,7 +136,16 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
           </div>
         </div>
 
-        {hasPalpite ? (
+        {!aberto ? (
+          <div className="w-[calc(100%-2rem)] mx-4 mb-4 rounded-xl frosted-card-inner px-4 py-3 text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-200/80">
+              Palpites encerrados
+            </p>
+            <p className="text-[11px] text-white/45 mt-1">
+              Prazo fechou 5 minutos antes do jogo
+            </p>
+          </div>
+        ) : hasPalpite ? (
           <button
             type="button"
             onClick={onAction}

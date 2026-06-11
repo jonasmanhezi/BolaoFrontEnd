@@ -21,6 +21,7 @@ import {
 import {
   partidaTemResultado,
   partidaAoVivo,
+  palpiteAberto,
 } from '@/lib/partida-status';
 import {
   criarOuAtualizarPalpite,
@@ -158,6 +159,13 @@ export default function PalpitesPage() {
   };
 
   const openPalpiteModal = (game: Partida) => {
+    if (!palpiteAberto(game)) {
+      toast.error('Palpites encerrados', {
+        description: 'O prazo fecha 5 minutos antes do início do jogo.',
+      });
+      return;
+    }
+
     setSelectedGame(game);
     const current = palpites[game.id] || { golsCasa: '', golsFora: '' };
     setModalGolsCasa(current.golsCasa !== '' ? current.golsCasa : '0');
@@ -182,6 +190,13 @@ export default function PalpitesPage() {
 
   const submitPalpiteFromModal = async () => {
     if (!selectedGame) return;
+    if (!palpiteAberto(selectedGame)) {
+      toast.error('Palpites encerrados', {
+        description: 'O prazo fecha 5 minutos antes do início do jogo.',
+      });
+      closeModal();
+      return;
+    }
     if (!modalGolsCasa || !modalGolsFora) {
       toast.error('Preencha os dois placares!');
       return;
@@ -383,12 +398,18 @@ export default function PalpitesPage() {
               />
             </div>
 
-            <PalpiteCtaButton onClick={submitPalpiteFromModal} className="w-full">
+            <PalpiteCtaButton
+              onClick={submitPalpiteFromModal}
+              className="w-full"
+              disabled={!palpiteAberto(selectedGame)}
+            >
               {palpiteAtualModal?.id ? 'Atualizar Palpite' : 'Enviar Palpite'}
             </PalpiteCtaButton>
 
             <p className="text-center text-[11px] opacity-50 mt-4">
-              Palpites não podem ser alterados após o início da partida
+              {palpiteAberto(selectedGame)
+                ? 'Palpites se encerram 5 minutos antes do início da partida'
+                : 'Prazo encerrado para esta partida'}
             </p>
           </div>
         </div>

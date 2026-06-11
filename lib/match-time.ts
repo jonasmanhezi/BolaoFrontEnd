@@ -4,7 +4,7 @@ export const BRAZIL_TIMEZONE = 'America/Sao_Paulo';
 
 const NAIVE_ISO_RE =
   /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
-const HAS_OFFSET_RE = /(?:[zZ]|[+\-]\d{2}:?\d{2})$/;
+const HAS_OFFSET_RE = /(?:[zZ]|[+\-]\d{2}:?\d{2}(?::?\d{2})?)$/;
 
 function formatInstantToBrazil(date: Date): { data: string; horario: string } {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -50,20 +50,7 @@ export function parsePartidaKickoff(data: string, horario: string): Date {
 
 export function formatPartidaDataHora(raw: string | null): { data: string; horario: string } {
   if (!raw) return { data: '', horario: '' };
-
-  const trimmed = raw.trim();
-
-  if (!HAS_OFFSET_RE.test(trimmed)) {
-    const naive = trimmed.match(NAIVE_ISO_RE);
-    if (naive) {
-      return {
-        data: naive[1],
-        horario: `${naive[2]}:${naive[3]}`,
-      };
-    }
-  }
-
-  return formatInstantToBrazil(parseDataHoraPartida(trimmed));
+  return formatInstantToBrazil(parseDataHoraPartida(raw.trim()));
 }
 
 export function formatDateLong(dateStr: string): string {

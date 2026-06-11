@@ -14,8 +14,6 @@ import { MobileSideMenu } from '@/components/layout/mobile-side-menu';
 import {
   Partida,
   getAllPartidas,
-  getLastDataSource,
-  clearPartidasCache,
   CALENDAR_END_DATE,
   CALENDAR_START_DATE,
   generateBrazilDateRange,
@@ -39,7 +37,6 @@ export default function PalpitesPage() {
 
   const [selectedDate, setSelectedDate] = useState(calendarDates[0]);
   const [allPartidas, setAllPartidas] = useState<Partida[]>([]);
-  const [dataSource, setDataSource] = useState<'backend' | 'mock'>('mock');
   const [loading, setLoading] = useState(true);
   const [palpites, setPalpites] = useState<Record<number, PalpiteLocal>>({});
   const [loadingPalpites, setLoadingPalpites] = useState(false);
@@ -119,14 +116,6 @@ export default function PalpitesPage() {
         if (!ativo) return;
 
         setAllPartidas(partidas);
-        setDataSource(getLastDataSource());
-
-        if (getLastDataSource() === 'mock') {
-          setPalpitesError((prev) =>
-            prev || 'Partidas em modo mock — palpites podem não bater com os IDs reais.'
-          );
-        }
-
         aplicarPalpites(partidas, palpitesDoBackend);
       } catch (e: unknown) {
         if (!ativo) return;
@@ -149,36 +138,6 @@ export default function PalpitesPage() {
   }, [router]);
 
   const partidasDoDia = allPartidas.filter((p) => p.data === selectedDate);
-
-  const recarregar = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
-    clearPartidasCache();
-    setLoading(true);
-    setLoadingPalpites(true);
-    setPalpitesError('');
-
-    try {
-      const [partidas, palpitesDoBackend] = await Promise.all([
-        getAllPartidas(),
-        getPalpitesDoUsuario(),
-      ]);
-
-      setAllPartidas(partidas);
-      setDataSource(getLastDataSource());
-      aplicarPalpites(partidas, palpitesDoBackend);
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Erro ao recarregar dados';
-      setPalpitesError(message);
-    } finally {
-      setLoading(false);
-      setLoadingPalpites(false);
-    }
-  };
 
   const formatDateDisplay = (dateStr: string) => {
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -309,22 +268,9 @@ export default function PalpitesPage() {
           </span>
         </div>
 
-        {(palpitesError || dataSource === 'mock') && (
-          <div className="mb-4 text-[10px] flex flex-wrap items-center gap-x-3 gap-y-1 opacity-60">
-            {dataSource === 'mock' && (
-              <span className="text-amber-400">● Mock local (fallback)</span>
-            )}
-            {dataSource === 'backend' && (
-              <span className="text-emerald-400">● Backend conectado</span>
-            )}
-            <button
-              onClick={recarregar}
-              className="underline hover:opacity-100"
-              disabled={loading}
-            >
-              Recarregar
-            </button>
-            {palpitesError && <span className="text-red-400">{palpitesError}</span>}
+        {palpitesError && (
+          <div className="mb-4 text-[10px] text-red-400 opacity-80">
+            {palpitesError}
           </div>
         )}
 

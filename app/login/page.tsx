@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { GlassField } from '@/components/auth/glass-field';
-import { RegisterSheet } from '@/components/auth/register-sheet';
 import { GlassButton } from '@/components/ui/glass-button';
 import { loginWithCredentials, persistAuthSession } from '@/lib/auth-api';
 
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [registerOpen, setRegisterOpen] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,16 +94,13 @@ export default function LoginPage() {
 
       <div className="text-center mt-6 text-sm text-white/80">
         Ainda não tem conta?{' '}
-        <button
-          type="button"
-          onClick={() => setRegisterOpen(true)}
+        <Link
+          href="/register"
           className="text-white font-semibold hover:underline underline-offset-4"
         >
           Crie uma agora
-        </button>
+        </Link>
       </div>
-
-      <RegisterSheet open={registerOpen} onClose={() => setRegisterOpen(false)} />
     </AuthShell>
   );
 }

@@ -1,4 +1,5 @@
 import { getTeamSigla } from '@/lib/teams';
+import { formatPartidaDataHora } from '@/lib/match-time';
 
 export type PartidaStatus = 'AGENDADA' | 'EM_ANDAMENTO' | 'FINALIZADA' | 'CANCELADA';
 
@@ -89,41 +90,6 @@ function getTeamLogo(backendLogo: string | null | undefined, fallbackLogo: strin
   return fallbackLogo;
 }
 
-function formatDataHora(dataHora: string | null): { data: string; horario: string } {
-  if (!dataHora) return { data: '', horario: '' };
-
-  const raw = dataHora.trim();
-
-  let isoForDate = raw;
-  const hasOffset = /[zZ]|[+\-]\d{2}:?\d{2}$/.test(isoForDate);
-  if (!hasOffset && !isoForDate.endsWith('Z')) {
-    isoForDate = isoForDate + 'Z';
-  }
-  const dateForBr = new Date(isoForDate);
-
-  const data = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(dateForBr);
-
-  const timeMatch = raw.match(/(\d{2}):(\d{2})(?::\d{2})?/);
-  let horario = '??:??';
-  if (timeMatch) {
-    horario = `${timeMatch[1]}:${timeMatch[2]}`;
-  } else {
-    horario = new Intl.DateTimeFormat('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    }).format(dateForBr);
-  }
-
-  return { data, horario };
-}
-
 export async function getAllPartidas(): Promise<Partida[]> {
   if (allMatchesCache) return allMatchesCache;
   if (inFlightRequest) return inFlightRequest;
@@ -144,7 +110,7 @@ export async function getAllPartidas(): Promise<Partida[]> {
       const mapped: Partida[] = raw.map((p) => {
         const casaInfo = getTeamInfo(p.timeCasaId);
         const foraInfo = getTeamInfo(p.timeVisitanteId);
-        const { data, horario } = formatDataHora(p.dataHoraPartida ?? null);
+        const { data, horario } = formatPartidaDataHora(p.dataHoraPartida ?? null);
 
         const casa = p.nomeCasa || casaInfo.name;
         const fora = p.nomeVisitante || foraInfo.name;
@@ -219,7 +185,7 @@ function getMockAllPartidas(): Partida[] {
 }
 
 export const CALENDAR_START_DATE = '2026-06-11';
-export const CALENDAR_END_DATE = '2026-07-27';
+export const CALENDAR_END_DATE = '2026-06-27';
 
 export function generateBrazilDates(startDateStr: string, count: number): string[] {
   const dates: string[] = [];

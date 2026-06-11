@@ -1,4 +1,4 @@
-import { handleUnauthorizedStatus } from '@/lib/auth-session';
+import { handleUnauthorizedStatus, isSessionExpired } from '@/lib/auth-session';
 
 export class SessionExpiredError extends Error {
   constructor() {
@@ -7,10 +7,27 @@ export class SessionExpiredError extends Error {
   }
 }
 
-export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const res = await fetch(input, init);
+export type ApiFetchOptions = {
+  /**
+   * redirect: toast + login (default)
+   * throw: only throws SessionExpiredError (for background refresh)
+   */
+  onUnauthorized?: 'redirect' | 'throw';
+};
 
-  if (handleUnauthorizedStatus(res.status)) {
+export async function apiFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  options?: ApiFetchOptions
+): Promise<Response> {
+  if (isSessionExpired()) {
+    throw new SessionExpiredError();
+  }
+
+  const res = await fetch(input, init);
+  const unauthorizedHandling = options?.onUnauthorized ?? 'redirect';
+
+  if (handleUnauthorizedStatus(res.status, unauthorizedHandling)) {
     throw new SessionExpiredError();
   }
 

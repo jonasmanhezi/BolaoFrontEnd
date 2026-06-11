@@ -93,11 +93,13 @@ export async function getPalpitesPaginados(
   usuarioId: number,
   faseId: number = FASE_ID,
   page: number = 0,
-  size: number = PAGE_SIZE
+  size: number = PAGE_SIZE,
+  options?: { onUnauthorized?: 'redirect' | 'throw' }
 ): Promise<PaginatedPalpiteResponse> {
   const res = await apiFetch(
     `${getBackendApiBase()}/palpites/usuario/${usuarioId}/campeonato/${getCampeonatoId()}/fase/${faseId}?page=${page}&size=${size}`,
-    { headers: getAuthHeaders() }
+    { headers: getAuthHeaders() },
+    { onUnauthorized: options?.onUnauthorized }
   );
 
   if (res.status === 403) {
@@ -130,10 +132,14 @@ export async function getPalpitesPaginados(
   };
 }
 
-export async function getPalpitesPorCampeonatoFase(faseId: number = FASE_ID): Promise<Palpite[]> {
+export async function getPalpitesPorCampeonatoFase(
+  faseId: number = FASE_ID,
+  options?: { onUnauthorized?: 'redirect' | 'throw' }
+): Promise<Palpite[]> {
   const res = await apiFetch(
     `${getBackendApiBase()}/palpites/campeonato/${getCampeonatoId()}/fase/${faseId}`,
-    { headers: getAuthHeaders() }
+    { headers: getAuthHeaders() },
+    { onUnauthorized: options?.onUnauthorized }
   );
 
   if (!res.ok) {
@@ -146,14 +152,15 @@ export async function getPalpitesPorCampeonatoFase(faseId: number = FASE_ID): Pr
 
 async function getPalpitesPaginadosCompletos(
   usuarioId: number,
-  faseId: number = FASE_ID
+  faseId: number = FASE_ID,
+  options?: { onUnauthorized?: 'redirect' | 'throw' }
 ): Promise<Palpite[]> {
   const todos: Palpite[] = [];
   let page = 0;
   let totalPages = 1;
 
   while (page < totalPages) {
-    const resultado = await getPalpitesPaginados(usuarioId, faseId, page, PAGE_SIZE);
+    const resultado = await getPalpitesPaginados(usuarioId, faseId, page, PAGE_SIZE, options);
     todos.push(...resultado.content);
     totalPages = resultado.totalPages;
     page += 1;
@@ -162,18 +169,21 @@ async function getPalpitesPaginadosCompletos(
   return todos;
 }
 
-export async function getPalpitesDoUsuario(faseId: number = FASE_ID): Promise<Palpite[]> {
+export async function getPalpitesDoUsuario(
+  faseId: number = FASE_ID,
+  options?: { onUnauthorized?: 'redirect' | 'throw' }
+): Promise<Palpite[]> {
   const userId = getUserIdFromStorage();
 
   if (userId) {
     try {
-      return await getPalpitesPaginadosCompletos(userId, faseId);
+      return await getPalpitesPaginadosCompletos(userId, faseId, options);
     } catch (error) {
       console.warn('[PalpitesService] Falha no GET paginado, tentando fallback por campeonato/fase.', error);
     }
   }
 
-  return getPalpitesPorCampeonatoFase(faseId);
+  return getPalpitesPorCampeonatoFase(faseId, options);
 }
 
 export async function atualizarPalpite(
@@ -181,14 +191,18 @@ export async function atualizarPalpite(
   golsCasa: number,
   golsVisitante: number
 ): Promise<Palpite> {
-  const res = await apiFetch(`${getBackendApiBase()}/palpites/${palpiteId}`, {
-    method: 'PUT',
-    headers: {
-      ...getAuthHeaders(),
-      'Content-Type': 'application/json',
+  const res = await apiFetch(
+    `${getBackendApiBase()}/palpites/${palpiteId}`,
+    {
+      method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ golsCasa, golsVisitante }),
     },
-    body: JSON.stringify({ golsCasa, golsVisitante }),
-  });
+    { onUnauthorized: 'throw' }
+  );
 
   if (!res.ok) {
     throw new Error(await parseErrorResponse(res, 'Falha ao atualizar palpite.'));
@@ -208,14 +222,18 @@ export async function criarOuAtualizarPalpite(
     return atualizarPalpite(palpiteId, golsCasa, golsVisitante);
   }
 
-  const res = await apiFetch(`${getBackendApiBase()}/palpites`, {
-    method: 'POST',
-    headers: {
-      ...getAuthHeaders(),
-      'Content-Type': 'application/json',
+  const res = await apiFetch(
+    `${getBackendApiBase()}/palpites`,
+    {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId() }),
     },
-    body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId() }),
-  });
+    { onUnauthorized: 'throw' }
+  );
 
   if (!res.ok) {
     throw new Error(await parseErrorResponse(res, 'Falha ao registrar palpite.'));

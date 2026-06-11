@@ -30,6 +30,8 @@ import {
   findDateWithPalpite,
   type PalpiteLocal,
 } from '@/lib/palpites';
+import { SessionExpiredError } from '@/lib/api-fetch';
+import { isSessionExpired, redirectToLogin } from '@/lib/auth-session';
 import { hasGrupoSession } from '@/lib/grupo';
 
 export default function PalpitesPage() {
@@ -76,6 +78,9 @@ export default function PalpitesPage() {
       const palpitesDoBackend = await getPalpitesDoUsuario();
       aplicarPalpites(partidas, palpitesDoBackend);
     } catch (e: unknown) {
+      if (e instanceof SessionExpiredError) {
+        return;
+      }
       const message = e instanceof Error ? e.message : 'Erro ao carregar palpites';
       console.error('Erro ao carregar palpites:', e);
       setPalpitesError(message);
@@ -190,6 +195,7 @@ export default function PalpitesPage() {
 
   const submitPalpiteFromModal = async () => {
     if (!selectedGame) return;
+    if (isSessionExpired()) return;
     if (!palpiteAberto(selectedGame)) {
       toast.error('Palpites encerrados', {
         description: 'O prazo fecha 5 minutos antes do início do jogo.',
@@ -228,13 +234,18 @@ export default function PalpitesPage() {
         description: `${selectedGame.casa} ${golsCasaNum} × ${golsForaNum} ${selectedGame.fora}`,
       });
 
-      await buscarPalpites(allPartidas);
+      closeModal();
     } catch (e: unknown) {
+      if (e instanceof SessionExpiredError) {
+        redirectToLogin({
+          sessionExpired: true,
+          toastDescription: 'Seu palpite não foi salvo. Faça login e tente novamente.',
+        });
+        return;
+      }
       console.error(e);
       const message = e instanceof Error ? e.message : 'verifique o backend e se a partida existe';
       toast.error('Erro ao salvar palpite', { description: message });
-    } finally {
-      closeModal();
     }
   };
 

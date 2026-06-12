@@ -169,6 +169,14 @@ async function getPalpitesPaginadosCompletos(
   return todos;
 }
 
+export async function getPalpitesDoJogador(
+  usuarioId: number,
+  faseId: number = FASE_ID,
+  options?: { onUnauthorized?: 'redirect' | 'throw' }
+): Promise<Palpite[]> {
+  return getPalpitesPaginadosCompletos(usuarioId, faseId, options);
+}
+
 export async function getPalpitesDoUsuario(
   faseId: number = FASE_ID,
   options?: { onUnauthorized?: 'redirect' | 'throw' }

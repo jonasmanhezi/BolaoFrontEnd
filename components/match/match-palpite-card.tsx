@@ -6,7 +6,12 @@ import { PalpiteCtaButton } from '@/components/match/palpite-cta-button';
 import type { Partida } from '@/lib/partidas';
 import { DEFAULT_TEAM_LOGO } from '@/lib/partidas';
 import { getKickoffCountdown } from '@/lib/match-time';
-import { partidaTemResultado, partidaAoVivo, palpiteAberto } from '@/lib/partida-status';
+import {
+  partidaTemResultado,
+  partidaAoVivo,
+  partidaFinalizada,
+  palpiteAberto,
+} from '@/lib/partida-status';
 import type { PalpiteLocal } from '@/lib/palpites';
 
 interface MatchPalpiteCardProps {
@@ -42,11 +47,14 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
 
   const hasPalpite = !!palpite && palpite.golsCasa !== '' && palpite.golsFora !== '';
   const showOfficialScore = partidaTemResultado(game);
+  const aoVivo = partidaAoVivo(game);
+  const finalizada = partidaFinalizada(game);
   const aberto =
     nowMs == null
       ? game.status === 'AGENDADA' || game.status == null
       : palpiteAberto(game, nowMs);
   const countdown = nowMs == null ? '' : getKickoffCountdown(game, nowMs);
+  const showPalpiteEncerradosBanner = !aberto && !aoVivo && !finalizada;
 
   return (
     <div className="frosted-card">
@@ -87,7 +95,7 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
               {showOfficialScore ? (
                 <>
                   <span className="text-[9px] uppercase tracking-widest text-white/40 mb-0.5">
-                    {partidaAoVivo(game) ? 'Ao vivo' : 'Placar'}
+                    {aoVivo ? 'Ao vivo' : finalizada ? 'Resultado final' : 'Placar'}
                   </span>
                   <span className="text-lg font-bold tabular-nums">
                     {game.golsCasa} × {game.golsVisitante}
@@ -136,7 +144,22 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
           </div>
         </div>
 
-        {!aberto ? (
+        {finalizada && hasPalpite ? (
+          <div className="w-[calc(100%-2rem)] mx-4 mb-4 rounded-xl frosted-card-inner px-4 py-3">
+            <p className="text-[10px] font-semibold tracking-widest text-white/45 text-center mb-2">
+              SEU PALPITE
+            </p>
+            <div className="flex items-center gap-1.5 justify-center">
+              <MiniFlag logo={game.logoCasa} alt={game.casa} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
+              <span className="text-white/30 text-xs mx-0.5">×</span>
+              <MiniFlag logo={game.logoFora} alt={game.fora} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+            </div>
+          </div>
+        ) : null}
+
+        {showPalpiteEncerradosBanner ? (
           <div className="w-[calc(100%-2rem)] mx-4 mb-4 rounded-xl frosted-card-inner px-4 py-3 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-200/80">
               Palpites encerrados
@@ -145,7 +168,7 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
               Prazo fechou 5 minutos antes do jogo
             </p>
           </div>
-        ) : hasPalpite ? (
+        ) : finalizada ? null : aberto && hasPalpite ? (
           <button
             type="button"
             onClick={onAction}
@@ -166,6 +189,19 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
               <ChevronRight size={16} />
             </div>
           </button>
+        ) : aoVivo && hasPalpite ? (
+          <div className="frosted-card-inner w-[calc(100%-2rem)] mx-4 mb-4 flex items-center gap-3 px-3 py-3 rounded-xl text-left">
+            <span className="text-[10px] font-semibold tracking-widest text-white/50 shrink-0">
+              SEU PALPITE:
+            </span>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-center">
+              <MiniFlag logo={game.logoCasa} alt={game.casa} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
+              <span className="text-white/30 text-xs mx-0.5">vs</span>
+              <MiniFlag logo={game.logoFora} alt={game.fora} />
+              <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+            </div>
+          </div>
         ) : (
           <PalpiteCtaButton
             onClick={onAction}

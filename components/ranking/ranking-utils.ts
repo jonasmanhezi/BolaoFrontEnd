@@ -1,5 +1,9 @@
 import type { RankingEntry } from '@/lib/ranking';
 
+export function formatRankingScore(pontuacao: number): string {
+  return pontuacao.toLocaleString('pt-BR');
+}
+
 export function getInitials(nome: string): string {
   return nome
     .split(' ')

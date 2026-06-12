@@ -53,6 +53,31 @@ export function formatPartidaDataHora(raw: string | null): { data: string; horar
   return formatInstantToBrazil(parseDataHoraPartida(raw.trim()));
 }
 
+export function getTodayBrazilDateString(now: Date = new Date()): string {
+  return formatInstantToBrazil(now).data;
+}
+
+export type CalendarDayMarker = 'past' | 'today' | 'future';
+
+export function getCalendarDayMarker(
+  dateStr: string,
+  todayStr: string = getTodayBrazilDateString()
+): CalendarDayMarker {
+  if (dateStr < todayStr) return 'past';
+  if (dateStr === todayStr) return 'today';
+  return 'future';
+}
+
+export function resolveDefaultCalendarDate(
+  dates: string[],
+  todayStr: string = getTodayBrazilDateString()
+): string {
+  if (dates.length === 0) return todayStr;
+  if (todayStr < dates[0]) return dates[0];
+  if (todayStr > dates[dates.length - 1]) return dates[dates.length - 1];
+  return todayStr;
+}
+
 export function formatDateLong(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number);
   const utcDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));

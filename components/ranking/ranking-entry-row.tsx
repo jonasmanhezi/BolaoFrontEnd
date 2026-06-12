@@ -1,5 +1,6 @@
 'use client';
 
+import { Eye } from 'lucide-react';
 import { FrostedCard } from '@/components/ui/frosted-card';
 import type { RankingEntry } from '@/lib/ranking';
 import {
@@ -13,9 +14,15 @@ interface RankingEntryRowProps {
   entry: RankingEntry;
   currentUserId: number | null;
   leaderScore: number;
+  onViewPalpites?: (entry: RankingEntry) => void;
 }
 
-export function RankingEntryRow({ entry, currentUserId, leaderScore }: RankingEntryRowProps) {
+export function RankingEntryRow({
+  entry,
+  currentUserId,
+  leaderScore,
+  onViewPalpites,
+}: RankingEntryRowProps) {
   const isCurrentUser = isCurrentUserEntry(entry, currentUserId);
   const progress = leaderScore > 0 ? Math.min(100, (entry.pontuacao / leaderScore) * 100) : 0;
 
@@ -65,9 +72,21 @@ export function RankingEntryRow({ entry, currentUserId, leaderScore }: RankingEn
           </div>
         </div>
 
-        <div className="text-right shrink-0 ml-1">
-          <div className="text-xl font-bold tabular-nums text-white/85">{entry.pontuacao}</div>
-          <div className="text-[9px] uppercase tracking-widest text-white/35">pontos</div>
+        <div className="flex flex-col items-end gap-2 shrink-0 ml-1">
+          <div className="text-right">
+            <div className="text-xl font-bold tabular-nums text-white/85">{entry.pontuacao}</div>
+            <div className="text-[9px] uppercase tracking-widest text-white/35">pontos</div>
+          </div>
+          {onViewPalpites ? (
+            <button
+              type="button"
+              onClick={() => onViewPalpites(entry)}
+              className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/6 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/55 hover:bg-white/10 hover:text-white/80 transition-colors"
+            >
+              <Eye size={12} />
+              Palpites
+            </button>
+          ) : null}
         </div>
       </div>
     </FrostedCard>

@@ -197,7 +197,8 @@ export async function getPalpitesDoUsuario(
 export async function atualizarPalpite(
   palpiteId: number,
   golsCasa: number,
-  golsVisitante: number
+  golsVisitante: number,
+  faseId?: number
 ): Promise<Palpite> {
   const res = await apiFetch(
     `${getBackendApiBase()}/palpites/${palpiteId}`,
@@ -207,7 +208,7 @@ export async function atualizarPalpite(
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ golsCasa, golsVisitante }),
+      body: JSON.stringify({ golsCasa, golsVisitante, ...(faseId != null && { faseId }) }),
     },
     { onUnauthorized: 'throw' }
   );
@@ -224,10 +225,11 @@ export async function criarOuAtualizarPalpite(
   partidaId: number,
   golsCasa: number,
   golsVisitante: number,
-  palpiteId?: number
+  palpiteId?: number,
+  faseId?: number
 ): Promise<Palpite> {
   if (palpiteId) {
-    return atualizarPalpite(palpiteId, golsCasa, golsVisitante);
+    return atualizarPalpite(palpiteId, golsCasa, golsVisitante, faseId);
   }
 
   const res = await apiFetch(
@@ -238,7 +240,7 @@ export async function criarOuAtualizarPalpite(
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId() }),
+      body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId(), ...(faseId != null && { faseId }) }),
     },
     { onUnauthorized: 'throw' }
   );

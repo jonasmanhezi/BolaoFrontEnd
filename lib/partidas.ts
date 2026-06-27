@@ -183,7 +183,7 @@ function getMockAllPartidas(): Partida[] {
 }
 
 export const CALENDAR_START_DATE = '2026-06-11';
-export const CALENDAR_END_DATE = '2026-06-27';
+export const CALENDAR_END_DATE = '2026-07-03';
 
 function addDaysToDateString(dateStr: string, days: number): string {
   const [year, month, day] = dateStr.split('-').map(Number);

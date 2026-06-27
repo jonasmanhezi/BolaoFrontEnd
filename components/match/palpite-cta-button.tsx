@@ -9,6 +9,7 @@ interface PalpiteCtaButtonProps {
   className?: string;
   type?: 'button' | 'submit';
   disabled?: boolean;
+  knockout?: boolean;
 }
 
 export function PalpiteCtaButton({
@@ -17,6 +18,7 @@ export function PalpiteCtaButton({
   className,
   type = 'button',
   disabled,
+  knockout,
 }: PalpiteCtaButtonProps) {
   return (
     <button
@@ -25,12 +27,21 @@ export function PalpiteCtaButton({
       disabled={disabled}
       className={cn(
         'py-3.5 rounded-xl backdrop-blur-md',
-        'bg-linear-to-r from-[#182060]/95 via-[#1a247d]/95 to-[#1e2f7a]/95',
-        'border border-white/18 hover:border-white/28',
-        'hover:from-[#1e2a72] hover:via-[#2438a8] hover:to-[#2a4494]',
+        knockout
+          ? [
+              'bg-linear-to-r from-[#3d2800]/95 via-[#5a3a00]/95 to-[#3d2800]/95',
+              'border border-amber-400/20 hover:border-amber-400/35',
+              'hover:from-[#4a3200] hover:via-[#6e4700] hover:to-[#4a3200]',
+              'shadow-[0_4px_20px_rgba(120,80,0,0.4)] hover:shadow-[0_6px_28px_rgba(180,120,10,0.5)]',
+            ]
+          : [
+              'bg-linear-to-r from-[#182060]/95 via-[#1a247d]/95 to-[#1e2f7a]/95',
+              'border border-white/18 hover:border-white/28',
+              'hover:from-[#1e2a72] hover:via-[#2438a8] hover:to-[#2a4494]',
+              'shadow-[0_4px_20px_rgba(26,36,125,0.4)] hover:shadow-[0_6px_28px_rgba(36,56,168,0.5)]',
+            ],
         'text-white font-semibold text-sm tracking-wide transition-all active:scale-[0.98]',
         'flex items-center justify-center gap-1',
-        'shadow-[0_4px_20px_rgba(26,36,125,0.4)] hover:shadow-[0_6px_28px_rgba(36,56,168,0.5)]',
         'disabled:opacity-50 disabled:pointer-events-none',
         className
       )}

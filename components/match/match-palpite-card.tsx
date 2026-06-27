@@ -56,8 +56,10 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
   const countdown = nowMs == null ? '' : getKickoffCountdown(game, nowMs);
   const showPalpiteEncerradosBanner = !aberto && !aoVivo && !finalizada;
 
+  const isKnockout = game.data >= '2026-06-28';
+
   return (
-    <div className="frosted-card">
+    <div className={`frosted-card${isKnockout ? ' frosted-card--knockout' : ''}`}>
       <div className="frosted-card__blur" aria-hidden />
       <div className="frosted-card__glass" aria-hidden />
       <div className="frosted-card__shine" aria-hidden />
@@ -68,9 +70,20 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
             <Clock size={15} className="opacity-60" />
             <span className="font-medium tabular-nums">{game.horario}</span>
           </div>
-          <span className="text-xs font-semibold tracking-wide text-white/45 uppercase">
-            {countdown}
-          </span>
+          <div className="flex items-center gap-2">
+            {isKnockout ? (
+              <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300/90 border border-amber-400/25">
+                Eliminatória
+              </span>
+            ) : (
+              <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-white/8 text-white/55 border border-white/15">
+                Fase de Grupos
+              </span>
+            )}
+            <span className="text-xs font-semibold tracking-wide text-white/45 uppercase">
+              {countdown}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 px-4 pb-4">
@@ -206,6 +219,7 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
           <PalpiteCtaButton
             onClick={onAction}
             className="w-[calc(100%-2rem)] mx-4 mb-4"
+            knockout={isKnockout}
           >
             Enviar Palpite
           </PalpiteCtaButton>

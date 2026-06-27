@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Trophy } from 'lucide-react';
+import { getTodayBrazilDateString } from '@/lib/match-time';
+import { RotateCw, Sparkles, Trophy } from 'lucide-react';
 import { FrostedCard } from '@/components/ui/frosted-card';
 import { AppMobileHeader } from '@/components/layout/app-mobile-header';
 import { MobileSideMenu } from '@/components/layout/mobile-side-menu';
@@ -12,7 +13,9 @@ import { RankingPodium } from '@/components/ranking/ranking-podium';
 import { RankingSkeleton } from '@/components/ranking/ranking-skeleton';
 import { RankingPalpitesSheet } from '@/components/ranking/ranking-palpites-sheet';
 import { RankingStatsBar } from '@/components/ranking/ranking-stats-bar';
-import { splitRanking } from '@/components/ranking/ranking-utils';
+import { RankingAuraPopup } from '@/components/ranking/ranking-aura-popup';
+import { RankingYourStanding } from '@/components/ranking/ranking-your-standing';
+import { splitRanking, isCurrentUserEntry } from '@/components/ranking/ranking-utils';
 import {
   getRanking,
   getUserIdFromStorage,
@@ -24,6 +27,7 @@ export default function RankingPage() {
   const router = useRouter();
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [currentUserId] = useState<number | null>(() =>
     typeof window !== 'undefined' ? getUserIdFromStorage() : null
@@ -33,10 +37,48 @@ export default function RankingPage() {
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
 
-  const { podium, rest, leader } = splitRanking(ranking);
+  const { sorted, podium, rest, leader } = splitRanking(ranking);
+  const isKnockout = getTodayBrazilDateString() >= '2026-06-28';
+
+  const currentUserEntry = useMemo(
+    () => sorted.find((e) => isCurrentUserEntry(e, currentUserId)) ?? null,
+    [sorted, currentUserId]
+  );
+  const currentUserAbove = useMemo(() => {
+    if (!currentUserEntry) return null;
+    const idx = sorted.findIndex((e) => e.userId === currentUserEntry.userId);
+    return idx > 0 ? sorted[idx - 1] : null;
+  }, [sorted, currentUserEntry]);
+
+  // mapa userId -> pontos do jogador imediatamente acima
+  const gapAboveByUser = useMemo(() => {
+    const map = new Map<number, number>();
+    for (let i = 1; i < sorted.length; i++) {
+      map.set(sorted[i].userId, sorted[i - 1].pontuacao - sorted[i].pontuacao);
+    }
+    return map;
+  }, [sorted]);
 
   const openPalpites = (entry: RankingEntry) => setPalpitesEntry(entry);
   const closePalpites = () => setPalpitesEntry(null);
+
+  const loadRanking = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError('');
+
+    try {
+      const data = await getRanking();
+      setRanking(data);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erro ao carregar ranking';
+      setError(message);
+      setRanking([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -50,56 +92,40 @@ export default function RankingPage() {
       return;
     }
 
-    let cancelled = false;
-
-    async function loadRanking() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const data = await getRanking();
-        if (!cancelled) {
-          setRanking(data);
-        }
-      } catch (e: unknown) {
-        if (!cancelled) {
-          const message = e instanceof Error ? e.message : 'Erro ao carregar ranking';
-          setError(message);
-          setRanking([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
     loadRanking();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
+  }, [router, loadRanking]);
 
   return (
-    <div className="min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative">
-      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} />
-      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+    <div className={`min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative${isKnockout ? ' bolao-palpites-bg--knockout' : ''}`}>
+      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout={isKnockout} />
+      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout={isKnockout} />
 
       <div className="relative z-10 max-w-xl mx-auto w-full px-6 py-6 pb-32">
         <motion.div
-          className="mb-6"
+          className="mb-6 flex items-start justify-between gap-3"
           initial={animate ? { opacity: 0, y: -10 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex items-center gap-2.5 mb-1">
-            <Trophy size={22} className="text-amber-300/80" />
-            <h1 className="text-2xl font-bold tracking-wide">Ranking</h1>
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <Trophy size={22} className="text-amber-300/80" />
+              <h1 className="text-2xl font-bold tracking-wide">Ranking</h1>
+            </div>
+            <p className="text-sm opacity-70">
+              Os melhores palpiteiros da Copa do Mundo 2026
+            </p>
           </div>
-          <p className="text-sm opacity-70">
-            Os melhores palpiteiros da Copa do Mundo 2026
-          </p>
+
+          <button
+            type="button"
+            onClick={() => loadRanking(true)}
+            disabled={loading || refreshing}
+            aria-label="Atualizar ranking"
+            className="shrink-0 mt-1 w-10 h-10 rounded-xl liquid-glass-pill flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+          >
+            <RotateCw size={18} className={refreshing ? 'animate-spin' : ''} />
+          </button>
         </motion.div>
 
         {loading && <RankingSkeleton />}
@@ -130,6 +156,16 @@ export default function RankingPage() {
                 currentUserId={currentUserId}
                 onViewPalpites={openPalpites}
               />
+            )}
+
+            {currentUserEntry && currentUserEntry.posicao > 3 && (
+              <motion.div
+                initial={animate ? { opacity: 0, y: 14 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: animate ? 0.44 : 0, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <RankingYourStanding entry={currentUserEntry} above={currentUserAbove} knockout={isKnockout} />
+              </motion.div>
             )}
 
             <motion.div
@@ -175,6 +211,8 @@ export default function RankingPage() {
                         entry={entry}
                         currentUserId={currentUserId}
                         leaderScore={leader?.pontuacao ?? 0}
+                        gapToAbove={gapAboveByUser.get(entry.userId) ?? null}
+                        knockout={isKnockout}
                         onViewPalpites={openPalpites}
                       />
                     </motion.div>
@@ -206,6 +244,12 @@ export default function RankingPage() {
         currentUserId={currentUserId}
         open={palpitesEntry != null}
         onClose={closePalpites}
+      />
+
+      <RankingAuraPopup
+        leader={leader}
+        isCurrentUser={leader ? isCurrentUserEntry(leader, currentUserId) : false}
+        trigger={!loading && !error && ranking.length > 0}
       />
     </div>
   );

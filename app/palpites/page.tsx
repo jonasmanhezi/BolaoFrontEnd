@@ -39,6 +39,7 @@ import {
 import { SessionExpiredError } from '@/lib/api-fetch';
 import { isSessionExpired, redirectToLogin } from '@/lib/auth-session';
 import { hasGrupoSession } from '@/lib/grupo';
+import { PalpiteCampeaoModal } from '@/components/palpite-campeao/palpite-campeao-modal';
 
 export default function PalpitesPage() {
   const router = useRouter();
@@ -237,7 +238,8 @@ export default function PalpitesPage() {
         selectedGame.id,
         golsCasaNum,
         golsForaNum,
-        palpiteExistente?.id
+        palpiteExistente?.id,
+        selectedGame.faseId
       );
 
       setPalpites((prev) => ({
@@ -270,10 +272,11 @@ export default function PalpitesPage() {
   };
 
   return (
-    <div className="min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative">
+    <div className={`min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative${selectedDate >= '2026-06-28' ? ' bolao-palpites-bg--knockout' : ''}`}>
 
-      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} />
-      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout={selectedDate >= '2026-06-28'} />
+      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout={selectedDate >= '2026-06-28'} />
+      <PalpiteCampeaoModal todayBrazil={todayBrazil} />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-6 pb-32">
         <motion.div
@@ -443,7 +446,7 @@ export default function PalpitesPage() {
       <AnimatePresence>
         {modalOpen && selectedGame && (
           <motion.div
-            className="fixed inset-0 z-[100] bg-[#050716]/85 backdrop-blur-sm flex items-end justify-center"
+            className={`fixed inset-0 z-[100] backdrop-blur-sm flex items-end justify-center ${selectedDate >= '2026-06-28' ? 'bg-[#0a0600]/85' : 'bg-[#050716]/85'}`}
             initial={animate ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
             exit={animate ? { opacity: 0 } : undefined}
@@ -451,7 +454,7 @@ export default function PalpitesPage() {
             onClick={closeModal}
           >
             <motion.div
-              className="w-full max-w-md palpite-modal-sheet rounded-t-[28px] rounded-b-none p-6 pb-10"
+              className={`w-full max-w-md palpite-modal-sheet rounded-t-[28px] rounded-b-none p-6 pb-10${selectedDate >= '2026-06-28' ? ' palpite-modal-sheet--knockout' : ''}`}
               initial={animate ? { y: '100%' } : false}
               animate={{ y: 0 }}
               exit={animate ? { y: '100%' } : undefined}
@@ -537,6 +540,7 @@ export default function PalpitesPage() {
               onClick={submitPalpiteFromModal}
               className="w-full"
               disabled={!palpiteAberto(selectedGame)}
+              knockout={selectedDate >= '2026-06-28'}
             >
               {palpiteAtualModal?.id ? 'Atualizar Palpite' : 'Enviar Palpite'}
             </PalpiteCtaButton>

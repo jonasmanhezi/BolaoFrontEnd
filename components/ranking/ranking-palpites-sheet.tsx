@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ListChecks, X } from 'lucide-react';
+import { ListChecks, Lock, X } from 'lucide-react';
 import { PalpiteHistoryCard } from '@/components/palpite/palpite-history-card';
 import { formatDateLong } from '@/lib/match-time';
-import { getAllPartidas, type Partida } from '@/lib/partidas';
+import { getAllPartidas, DEFAULT_TEAM_LOGO, type Partida } from '@/lib/partidas';
 import { getPalpitesDoJogador, type Palpite } from '@/lib/palpites';
+import { partidaFinalizada } from '@/lib/partida-status';
 import type { RankingEntry } from '@/lib/ranking';
 import { displayName, getInitials } from '@/components/ranking/ranking-utils';
 
@@ -50,6 +51,54 @@ function groupHistoricoByDate(items: HistoricoItem[]): Array<{ date: string; ite
   return Array.from(groups.entries())
     .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
     .map(([date, groupItems]) => ({ date, items: groupItems }));
+}
+
+function LockedPalpiteCard({ partida }: { partida?: Partida }) {
+  return (
+    <div className="frosted-card">
+      <div className="frosted-card__blur" aria-hidden />
+      <div className="frosted-card__glass" aria-hidden />
+      <div className="frosted-card__shine" aria-hidden />
+      <div className="frosted-card__content px-4 py-4">
+        {partida ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <img
+                src={partida.logoCasa}
+                alt={partida.casa}
+                className="w-7 h-7 object-contain shrink-0"
+                onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = DEFAULT_TEAM_LOGO; }}
+              />
+              <span className="text-xs font-semibold text-white/70 truncate">{partida.siglaCasa}</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1 shrink-0 px-2">
+              <Lock size={15} className="text-white/45" />
+              <span className="text-[9px] uppercase tracking-wider text-white/35">Oculto</span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+              <span className="text-xs font-semibold text-white/70 truncate">{partida.siglaFora}</span>
+              <img
+                src={partida.logoFora}
+                alt={partida.fora}
+                className="w-7 h-7 object-contain shrink-0"
+                onError={(e) => { const img = e.currentTarget; img.onerror = null; img.src = DEFAULT_TEAM_LOGO; }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 text-white/45">
+            <Lock size={15} />
+            <span className="text-xs">Palpite oculto</span>
+          </div>
+        )}
+        <p className="text-center text-[10px] text-white/35 mt-3">
+          Visível após o fim da partida
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export function RankingPalpitesSheet({
@@ -115,6 +164,7 @@ export function RankingPalpitesSheet({
   if (!entry) return null;
 
   const nomeExibicao = displayName(entry, currentUserId);
+  const isOwnProfile = currentUserId != null && entry.userId === currentUserId;
 
   return (
     <AnimatePresence>
@@ -200,13 +250,21 @@ export function RankingPalpitesSheet({
                           : formatDateLong(group.date)}
                       </h3>
                       <div className="flex flex-col gap-3">
-                        {group.items.map((item) => (
-                          <PalpiteHistoryCard
-                            key={item.palpite.id ?? `${item.palpite.partidaId}-${item.palpite.golsCasa}-${item.palpite.golsVisitante}`}
-                            palpite={item.palpite}
-                            partida={item.partida}
-                          />
-                        ))}
+                        {group.items.map((item) => {
+                          const key = item.palpite.id ?? `${item.palpite.partidaId}-${item.palpite.golsCasa}-${item.palpite.golsVisitante}`;
+                          const revelado =
+                            isOwnProfile || (item.partida != null && partidaFinalizada(item.partida));
+
+                          return revelado ? (
+                            <PalpiteHistoryCard
+                              key={key}
+                              palpite={item.palpite}
+                              partida={item.partida}
+                            />
+                          ) : (
+                            <LockedPalpiteCard key={key} partida={item.partida} />
+                          );
+                        })}
                       </div>
                     </section>
                   ))}

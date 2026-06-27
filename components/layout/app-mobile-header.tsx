@@ -4,11 +4,12 @@ import { Menu } from 'lucide-react';
 
 interface AppMobileHeaderProps {
   onMenuOpen: () => void;
+  knockout?: boolean;
 }
 
-export function AppMobileHeader({ onMenuOpen }: AppMobileHeaderProps) {
+export function AppMobileHeader({ onMenuOpen, knockout }: AppMobileHeaderProps) {
   return (
-    <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between backdrop-blur-sm bg-[#0e1238]/35 border-b border-white/8">
+    <header className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between backdrop-blur-sm border-b border-white/8 ${knockout ? 'bg-[#1a1000]/30' : 'bg-[#0e1238]/35'}`}>
       <button
         type="button"
         onClick={onMenuOpen}

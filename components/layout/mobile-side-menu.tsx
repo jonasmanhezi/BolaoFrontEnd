@@ -10,6 +10,7 @@ import { redirectToLogin } from '@/lib/auth-session';
 interface MobileSideMenuProps {
   open: boolean;
   onClose: () => void;
+  knockout?: boolean;
 }
 
 const navItems = [
@@ -19,7 +20,7 @@ const navItems = [
   { href: '/regras', label: 'Regras', icon: BookOpen },
 ];
 
-export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
+export function MobileSideMenu({ open, onClose, knockout }: MobileSideMenuProps) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -50,9 +51,11 @@ export function MobileSideMenu({ open, onClose }: MobileSideMenuProps) {
       />
 
       <aside
-        className={`fixed top-0 left-0 z-[90] h-dvh w-[min(82vw,300px)] flex flex-col border-r border-white/10 bg-[#0e1238]/95 backdrop-blur-2xl shadow-2xl transition-transform duration-300 ease-out ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 z-[90] h-dvh w-[min(82vw,300px)] flex flex-col backdrop-blur-2xl shadow-2xl transition-transform duration-300 ease-out ${
+          knockout
+            ? 'bg-[#120b00]/95 border-r border-amber-400/15'
+            : 'bg-[#0e1238]/95 border-r border-white/10'
+        } ${open ? 'translate-x-0' : '-translate-x-full'}`}
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">

@@ -60,11 +60,19 @@ function normalizePalpite(raw: unknown): Palpite | null {
     return null;
   }
 
+  const palpiteWinnerId =
+    item.palpiteWinnerId != null
+      ? Number(item.palpiteWinnerId)
+      : item.palpite_winner_id != null
+        ? Number(item.palpite_winner_id)
+        : null;
+
   return {
     id: item.id != null ? Number(item.id) : undefined,
     partidaId: Number(partidaId),
     golsCasa: Number(golsCasa),
     golsVisitante: Number(golsVisitante),
+    palpiteWinnerId,
     pontuacaoObtida:
       item.pontuacaoObtida != null
         ? Number(item.pontuacaoObtida)

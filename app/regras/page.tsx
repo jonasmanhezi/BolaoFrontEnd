@@ -10,6 +10,7 @@ import { getTodayBrazilDateString } from '@/lib/match-time';
 import {
   PONTUACAO_GRUPOS,
   PONTUACAO_KNOCKOUT,
+  PONTUACAO_PENALTI,
   BONUS_CAMPEAO,
   REGRAS_SECOES,
   REGRAS_SECOES_KNOCKOUT,
@@ -84,7 +85,7 @@ export default function RegrasPage() {
                 </div>
                 <div className="flex flex-col gap-3">
                   {PONTUACAO_GRUPOS.map((regra) => (
-                    <FrostedCard key={regra.pontos} className="p-4">
+                    <FrostedCard key={regra.pontos} knockout={isKnockout} className="p-4">
                       <div className="flex items-start gap-4">
                         <div className={`shrink-0 w-14 h-14 rounded-2xl border flex flex-col items-center justify-center ${regra.destaque}`}>
                           <span className="text-xl font-black tabular-nums leading-none">{regra.pontos}</span>
@@ -111,7 +112,7 @@ export default function RegrasPage() {
                 </div>
                 <div className="flex flex-col gap-4">
                   {REGRAS_SECOES.map((secao) => (
-                    <FrostedCard key={secao.id} className="p-5">
+                    <FrostedCard key={secao.id} knockout={isKnockout} className="p-5">
                       <h3 className="font-semibold text-white/90 mb-3">{secao.titulo}</h3>
                       <ul className="space-y-2.5">
                         {secao.itens.map((item) => (
@@ -144,7 +145,37 @@ export default function RegrasPage() {
                 </div>
                 <div className="flex flex-col gap-3">
                   {PONTUACAO_KNOCKOUT.map((regra) => (
-                    <FrostedCard key={regra.pontos} className="p-4 frosted-card--knockout">
+                    <FrostedCard key={regra.id} knockout className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className={`shrink-0 w-14 h-14 rounded-2xl border flex flex-col items-center justify-center ${regra.destaque}`}>
+                          <span className="text-xl font-black tabular-nums leading-none">{regra.pontos}</span>
+                          <span className="text-[9px] uppercase tracking-wider opacity-70 mt-0.5">pts</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-white/90">{regra.titulo}</h3>
+                          <p className="text-sm text-white/55 mt-1 leading-relaxed">{regra.descricao}</p>
+                          <p className="text-xs text-white/35 mt-2 italic">{regra.exemplo}</p>
+                        </div>
+                      </div>
+                    </FrostedCard>
+                  ))}
+                </div>
+              </section>
+
+              {/* Pontuação pênaltis */}
+              <section className="mb-6">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <Target size={16} className="text-amber-300/70" />
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-white/35">
+                    Pontuação · Jogos com pênaltis
+                  </h2>
+                </div>
+                <p className="text-xs text-white/40 px-1 mb-3 leading-relaxed">
+                  Quando um jogo eliminatório termina empatado e vai para pênaltis, a pontuação leva em conta se você acertou o vencedor da disputa.
+                </p>
+                <div className="flex flex-col gap-3">
+                  {PONTUACAO_PENALTI.map((regra) => (
+                    <FrostedCard key={regra.id} knockout className="p-4">
                       <div className="flex items-start gap-4">
                         <div className={`shrink-0 w-14 h-14 rounded-2xl border flex flex-col items-center justify-center ${regra.destaque}`}>
                           <span className="text-xl font-black tabular-nums leading-none">{regra.pontos}</span>
@@ -197,7 +228,7 @@ export default function RegrasPage() {
                 </div>
                 <div className="flex flex-col gap-4">
                   {REGRAS_SECOES_KNOCKOUT.map((secao) => (
-                    <FrostedCard key={secao.id} className="p-5 frosted-card--knockout">
+                    <FrostedCard key={secao.id} knockout className="p-5">
                       <h3 className="font-semibold text-amber-200/90 mb-3">{secao.titulo}</h3>
                       <ul className="space-y-2.5">
                         {secao.itens.map((item) => (

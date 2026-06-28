@@ -8,6 +8,7 @@ import type { Palpite } from '@/lib/palpites';
 interface PalpiteHistoryCardProps {
   palpite: Palpite;
   partida?: Partida;
+  knockout?: boolean;
 }
 
 function TeamColumn({
@@ -66,12 +67,12 @@ function getPontuacaoMeta(palpite: Palpite, partida?: Partida) {
   };
 }
 
-export function PalpiteHistoryCard({ palpite, partida }: PalpiteHistoryCardProps) {
+export function PalpiteHistoryCard({ palpite, partida, knockout }: PalpiteHistoryCardProps) {
   const pontuacao = getPontuacaoMeta(palpite, partida);
   const showOfficialScore = !!partida && partidaTemResultado(partida);
 
   return (
-    <div className="frosted-card">
+    <div className={`frosted-card${knockout ? ' frosted-card--knockout' : ''}`}>
       <div className="frosted-card__blur" aria-hidden />
       <div className="frosted-card__glass" aria-hidden />
       <div className="frosted-card__shine" aria-hidden />
@@ -99,6 +100,18 @@ export function PalpiteHistoryCard({ palpite, partida }: PalpiteHistoryCardProps
               <span className="text-xl font-bold tabular-nums">
                 {palpite.golsCasa} × {palpite.golsVisitante}
               </span>
+              {palpite.palpiteWinnerId != null && (() => {
+                const isCasa = palpite.palpiteWinnerId === partida?.timeCasaId;
+                const sigla = isCasa ? partida?.siglaCasa : partida?.siglaFora;
+                const logo = isCasa ? partida?.logoCasa : partida?.logoFora;
+                return (
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-[9px] text-amber-300/60 uppercase tracking-widest">pen:</span>
+                    {logo && <img src={logo} alt={sigla} className="w-3.5 h-3.5 object-contain" />}
+                    <span className="text-[10px] font-bold text-amber-300/90">{sigla}</span>
+                  </div>
+                );
+              })()}
               {showOfficialScore && (
                 <>
                   <span className="text-[9px] uppercase tracking-widest text-white/35 mt-2 mb-1">
@@ -107,6 +120,11 @@ export function PalpiteHistoryCard({ palpite, partida }: PalpiteHistoryCardProps
                   <span className="text-sm font-semibold tabular-nums text-white/70">
                     {partida.golsCasa} × {partida.golsVisitante}
                   </span>
+                  {partida.temPenalti && partida.penaltiCasa != null && partida.penaltiVisitante != null && (
+                    <span className="text-[10px] tabular-nums text-amber-300/70 font-semibold mt-0.5">
+                      ({partida.penaltiCasa} × {partida.penaltiVisitante}) pen.
+                    </span>
+                  )}
                 </>
               )}
             </div>

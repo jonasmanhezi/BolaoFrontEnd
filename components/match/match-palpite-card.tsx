@@ -20,6 +20,20 @@ interface MatchPalpiteCardProps {
   onAction: () => void;
 }
 
+function PenaltiWinner({ game, palpite }: { game: Partida; palpite: PalpiteLocal }) {
+  if (palpite.palpiteWinnerId == null) return null;
+  const isCasa = palpite.palpiteWinnerId === game.timeCasaId;
+  const logo = isCasa ? game.logoCasa : game.logoFora;
+  const sigla = isCasa ? game.siglaCasa : game.siglaFora;
+  return (
+    <div className="flex items-center justify-center gap-1 mt-1">
+      <span className="text-[9px] text-amber-300/60 uppercase tracking-widest">pen:</span>
+      <img src={logo} alt={sigla} className="w-3.5 h-3.5 object-contain" />
+      <span className="text-[10px] font-bold text-amber-300/90">{sigla}</span>
+    </div>
+  );
+}
+
 function MiniFlag({ logo, alt }: { logo: string; alt: string }) {
   return (
     <img
@@ -113,6 +127,16 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
                   <span className="text-lg font-bold tabular-nums">
                     {game.golsCasa} × {game.golsVisitante}
                   </span>
+                  {game.temPenalti && game.penaltiCasa != null && game.penaltiVisitante != null && (
+                    <>
+                      <span className="text-[10px] tabular-nums text-amber-300/80 font-semibold mt-0.5">
+                        ({game.penaltiCasa} × {game.penaltiVisitante})
+                      </span>
+                      <span className="text-[8px] uppercase tracking-widest text-amber-300/60 mt-0.5">
+                        Pênaltis
+                      </span>
+                    </>
+                  )}
                 </>
               ) : (
                 <span className="text-xs text-white/40 font-medium">Vs</span>
@@ -169,6 +193,7 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
               <MiniFlag logo={game.logoFora} alt={game.fora} />
               <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
             </div>
+            <PenaltiWinner game={game} palpite={palpite} />
           </div>
         ) : null}
 
@@ -190,12 +215,15 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
             <span className="text-[10px] font-semibold tracking-widest text-white/50 shrink-0">
               SEU PALPITE:
             </span>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-center">
-              <MiniFlag logo={game.logoCasa} alt={game.casa} />
-              <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
-              <span className="text-white/30 text-xs mx-0.5">vs</span>
-              <MiniFlag logo={game.logoFora} alt={game.fora} />
-              <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+            <div className="flex flex-col items-center flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 justify-center">
+                <MiniFlag logo={game.logoCasa} alt={game.casa} />
+                <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
+                <span className="text-white/30 text-xs mx-0.5">vs</span>
+                <MiniFlag logo={game.logoFora} alt={game.fora} />
+                <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+              </div>
+              <PenaltiWinner game={game} palpite={palpite} />
             </div>
             <div className="flex items-center gap-1.5 shrink-0 text-white/45">
               <Pencil size={14} />
@@ -207,12 +235,15 @@ export function MatchPalpiteCard({ game, palpite, onAction }: MatchPalpiteCardPr
             <span className="text-[10px] font-semibold tracking-widest text-white/50 shrink-0">
               SEU PALPITE:
             </span>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-center">
-              <MiniFlag logo={game.logoCasa} alt={game.casa} />
-              <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
-              <span className="text-white/30 text-xs mx-0.5">vs</span>
-              <MiniFlag logo={game.logoFora} alt={game.fora} />
-              <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+            <div className="flex flex-col items-center flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 justify-center">
+                <MiniFlag logo={game.logoCasa} alt={game.casa} />
+                <span className="text-sm font-bold tabular-nums">{palpite.golsCasa}</span>
+                <span className="text-white/30 text-xs mx-0.5">vs</span>
+                <MiniFlag logo={game.logoFora} alt={game.fora} />
+                <span className="text-sm font-bold tabular-nums">{palpite.golsFora}</span>
+              </div>
+              <PenaltiWinner game={game} palpite={palpite} />
             </div>
           </div>
         ) : (

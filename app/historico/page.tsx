@@ -17,7 +17,7 @@ import { DEFAULT_TEAM_LOGO } from '@/lib/partidas';
 
 const FASE_LABELS: Record<number, string> = {
   1: 'Fase de Grupos',
-  2: 'Oitavas de Final',
+  2: '16 Avos de Final',
   3: 'Quartas de Final',
   4: 'Semifinal',
   5: 'Final',
@@ -264,11 +264,11 @@ export default function HistoricoPage() {
         {/* Stats */}
         {!loading && !error && historico.length > 0 && (
           <div className="grid grid-cols-2 gap-3 mb-5">
-            <FrostedCard className="p-4 text-center">
+            <FrostedCard knockout={isKnockout} className="p-4 text-center">
               <div className="text-2xl font-bold tabular-nums">{filteredHistorico.length}</div>
               <div className="text-xs text-white/50 mt-1">Palpites</div>
             </FrostedCard>
-            <FrostedCard className="p-4 text-center">
+            <FrostedCard knockout={isKnockout} className="p-4 text-center">
               <div className="text-2xl font-bold tabular-nums text-emerald-300">{totalPontos}</div>
               <div className="text-xs text-white/50 mt-1">Pontos obtidos</div>
             </FrostedCard>
@@ -321,14 +321,14 @@ export default function HistoricoPage() {
 
         {/* Erro */}
         {!loading && error && (
-          <FrostedCard className="p-6 text-center">
+          <FrostedCard knockout={isKnockout} className="p-6 text-center">
             <p className="text-red-300/90">{error}</p>
           </FrostedCard>
         )}
 
         {/* Vazio */}
         {!loading && !error && historico.length === 0 && (
-          <FrostedCard className="p-10 text-center">
+          <FrostedCard knockout={isKnockout} className="p-10 text-center">
             <div className="mx-auto mb-4 w-16 h-16 rounded-full frosted-card-inner flex items-center justify-center">
               <History size={28} className="text-white/40" />
             </div>
@@ -350,7 +350,7 @@ export default function HistoricoPage() {
         {!loading && !error && historico.length > 0 && (
           <div className="flex flex-col gap-6">
             {filteredHistorico.length === 0 ? (
-              <FrostedCard className="p-8 text-center">
+              <FrostedCard knockout={isKnockout} className="p-8 text-center">
                 <p className="text-white/50 text-sm">Nenhum palpite nessa fase.</p>
               </FrostedCard>
             ) : (
@@ -365,6 +365,7 @@ export default function HistoricoPage() {
                         key={item.palpite.id ?? `${item.palpite.partidaId}-${item.palpite.golsCasa}-${item.palpite.golsVisitante}`}
                         palpite={item.palpite}
                         partida={item.partida}
+                        knockout={isKnockout}
                       />
                     ))}
                   </div>

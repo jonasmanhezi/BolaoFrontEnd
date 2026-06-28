@@ -62,6 +62,8 @@ export default function PalpitesPage() {
   const [selectedGame, setSelectedGame] = useState<Partida | null>(null);
   const [modalGolsCasa, setModalGolsCasa] = useState('');
   const [modalGolsFora, setModalGolsFora] = useState('');
+  const [penaltiModalOpen, setPenaltiModalOpen] = useState(false);
+  const [pendingWinnerId, setPendingWinnerId] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
@@ -212,9 +214,18 @@ export default function PalpitesPage() {
     setSelectedGame(null);
     setModalGolsCasa('');
     setModalGolsFora('');
+    setPenaltiModalOpen(false);
+    setPendingWinnerId(null);
   };
 
-  const submitPalpiteFromModal = async () => {
+  const isDrawInKnockout = (game: Partida, golsCasa: string, golsFora: string) => {
+    if (!game.faseId || game.faseId === 1) return false;
+    const casa = parseInt(golsCasa || '0', 10);
+    const fora = parseInt(golsFora || '0', 10);
+    return casa === fora;
+  };
+
+  const doSubmitPalpite = async (winnerId: number | null) => {
     if (!selectedGame) return;
     if (isSessionExpired()) return;
     if (!palpiteAberto(selectedGame)) {
@@ -222,10 +233,6 @@ export default function PalpitesPage() {
         description: 'O prazo fecha 5 minutos antes do início do jogo.',
       });
       closeModal();
-      return;
-    }
-    if (!modalGolsCasa || !modalGolsFora) {
-      toast.error('Preencha os dois placares!');
       return;
     }
 
@@ -239,7 +246,8 @@ export default function PalpitesPage() {
         golsCasaNum,
         golsForaNum,
         palpiteExistente?.id,
-        selectedGame.faseId
+        selectedGame.faseId,
+        winnerId
       );
 
       setPalpites((prev) => ({
@@ -248,6 +256,7 @@ export default function PalpitesPage() {
           id: salvo.id ?? palpiteExistente?.id,
           golsCasa: modalGolsCasa,
           golsFora: modalGolsFora,
+          palpiteWinnerId: winnerId,
         },
       }));
 
@@ -269,6 +278,30 @@ export default function PalpitesPage() {
       const message = e instanceof Error ? e.message : 'verifique o backend e se a partida existe';
       toast.error('Erro ao salvar palpite', { description: message });
     }
+  };
+
+  const submitPalpiteFromModal = async () => {
+    if (!selectedGame) return;
+    if (isSessionExpired()) return;
+    if (!palpiteAberto(selectedGame)) {
+      toast.error('Palpites encerrados', {
+        description: 'O prazo fecha 5 minutos antes do início do jogo.',
+      });
+      closeModal();
+      return;
+    }
+    if (!modalGolsCasa || !modalGolsFora) {
+      toast.error('Preencha os dois placares!');
+      return;
+    }
+
+    if (isDrawInKnockout(selectedGame, modalGolsCasa, modalGolsFora)) {
+      setPendingWinnerId(null);
+      setPenaltiModalOpen(true);
+      return;
+    }
+
+    await doSubmitPalpite(null);
   };
 
   return (
@@ -515,11 +548,23 @@ export default function PalpitesPage() {
             ) : null}
 
             {temPalpiteAtualModal && palpiteAtualModal ? (
-              <div className="mb-6 text-center rounded-2xl palpite-modal-inner py-3">
+              <div className="mb-6 text-center rounded-2xl palpite-modal-inner py-3 px-4">
                 <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Palpite atual</div>
                 <div className="text-2xl font-semibold tabular-nums text-white/85">
                   {palpiteAtualModal.golsCasa} × {palpiteAtualModal.golsFora}
                 </div>
+                {palpiteAtualModal.palpiteWinnerId != null && (() => {
+                  const isCasa = palpiteAtualModal.palpiteWinnerId === selectedGame.timeCasaId;
+                  const logo = isCasa ? selectedGame.logoCasa : selectedGame.logoFora;
+                  const sigla = isCasa ? selectedGame.siglaCasa : selectedGame.siglaFora;
+                  return (
+                    <div className="flex items-center justify-center gap-1.5 mt-2">
+                      <span className="text-[10px] text-amber-300/60 uppercase tracking-widest">Pênalti:</span>
+                      <img src={logo} alt={sigla} className="w-4 h-4 object-contain" />
+                      <span className="text-[11px] font-bold text-amber-300/90">{sigla}</span>
+                    </div>
+                  );
+                })()}
               </div>
             ) : null}
 
@@ -550,6 +595,112 @@ export default function PalpitesPage() {
                 ? 'Palpites se encerram 5 minutos antes do início da partida'
                 : 'Prazo encerrado para esta partida'}
             </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {penaltiModalOpen && selectedGame && (
+          <motion.div
+            className={`fixed inset-0 z-[110] backdrop-blur-sm flex items-end justify-center ${selectedDate >= '2026-06-28' ? 'bg-[#0a0600]/90' : 'bg-[#050716]/90'}`}
+            initial={animate ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            exit={animate ? { opacity: 0 } : undefined}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className={`w-full max-w-md palpite-modal-sheet rounded-t-[28px] rounded-b-none p-6 pb-10${selectedDate >= '2026-06-28' ? ' palpite-modal-sheet--knockout' : ''}`}
+              initial={animate ? { y: '100%' } : false}
+              animate={{ y: 0 }}
+              exit={animate ? { y: '100%' } : undefined}
+              transition={animate ? { type: 'spring', damping: 30, stiffness: 320 } : { duration: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <div className="text-xs opacity-60 uppercase tracking-widest">Mata-mata · Empate</div>
+                  <div className="font-semibold text-lg">Quem vence nos pênaltis?</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPenaltiModalOpen(false)}
+                  className="text-white/60 hover:text-white text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="text-xs text-white/45 mb-6">
+                Placar empatado em{' '}
+                <span className="font-semibold text-white/70">
+                  {modalGolsCasa} × {modalGolsFora}
+                </span>
+                . Escolha o time vencedor na disputa de pênaltis.
+              </p>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {[
+                  {
+                    id: selectedGame.timeCasaId,
+                    nome: selectedGame.casa,
+                    sigla: selectedGame.siglaCasa,
+                    logo: selectedGame.logoCasa,
+                  },
+                  {
+                    id: selectedGame.timeVisitanteId,
+                    nome: selectedGame.fora,
+                    sigla: selectedGame.siglaFora,
+                    logo: selectedGame.logoFora,
+                  },
+                ].map((team) => {
+                  const selected = pendingWinnerId === team.id;
+                  return (
+                    <button
+                      key={team.sigla}
+                      type="button"
+                      onClick={() => setPendingWinnerId(team.id ?? null)}
+                      className={`flex flex-col items-center gap-3 py-5 px-3 rounded-2xl border transition-all duration-200 ${
+                        selected
+                          ? 'bg-amber-400/15 border-amber-400/50 shadow-[0_0_0_2px_rgba(251,191,36,0.3)]'
+                          : 'palpite-modal-inner hover:bg-white/10'
+                      }`}
+                    >
+                      <img
+                        src={team.logo}
+                        alt={team.nome}
+                        className="w-14 h-14 object-contain drop-shadow-sm"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          img.onerror = null;
+                          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iI2U1ZTdlYiIvPjx0ZXh0IHg9IjE2IiB5PSIyMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzZiNzI4MCIgZm9udC1zaXplPSIxNCI+8J+OlTwvdGV4dD48L3N2Zz4=';
+                        }}
+                      />
+                      <span className="text-sm font-bold tracking-wide">{team.sigla}</span>
+                      {selected && (
+                        <span className="text-[10px] font-semibold tracking-widest text-amber-300 uppercase">
+                          Selecionado
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <PalpiteCtaButton
+                onClick={() => {
+                  if (!pendingWinnerId) {
+                    toast.error('Selecione o vencedor nos pênaltis');
+                    return;
+                  }
+                  setPenaltiModalOpen(false);
+                  doSubmitPalpite(pendingWinnerId);
+                }}
+                className="w-full"
+                knockout={selectedDate >= '2026-06-28'}
+              >
+                Confirmar Palpite
+              </PalpiteCtaButton>
             </motion.div>
           </motion.div>
         )}

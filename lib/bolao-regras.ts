@@ -30,25 +30,63 @@ export const PONTUACAO_GRUPOS = [
 
 export const PONTUACAO_KNOCKOUT = [
   {
+    id: 'ko-exato',
     pontos: 50,
     titulo: 'Placar exato',
-    descricao: 'Você acertou o resultado exato do jogo eliminatório.',
+    descricao: 'Você acertou o número de gols dos dois times no tempo regulamentar.',
     exemplo: 'Palpite 2×1 · Resultado 2×1',
     destaque: 'text-amber-300 bg-amber-400/15 border-amber-400/30',
   },
   {
+    id: 'ko-ganhador',
     pontos: 20,
     titulo: 'Acertou o ganhador',
-    descricao: 'Errou o placar, mas acertou qual time avançou.',
+    descricao: 'Errou o placar, mas acertou qual time avançou de fase no tempo regulamentar.',
     exemplo: 'Palpite 2×1 · Resultado 3×1 (mesmo vencedor)',
     destaque: 'text-orange-300 bg-orange-400/12 border-orange-400/25',
   },
   {
+    id: 'ko-errou',
     pontos: 0,
     titulo: 'Palpite incorreto',
     descricao: 'O time que você apostou não passou de fase.',
     exemplo: 'Palpite vitória do Brasil · Resultado Argentina avança',
     destaque: 'text-white/45 bg-white/5 border-white/10',
+  },
+] as const;
+
+export const PONTUACAO_PENALTI = [
+  {
+    id: 'pen-exato-acertou',
+    pontos: 70,
+    titulo: 'Placar exato + acertou o vencedor nos pênaltis',
+    descricao: 'Você cravou o placar empatado e ainda escolheu o time certo para vencer a disputa de pênaltis.',
+    exemplo: 'Palpite 1×1 + Portugal · Resultado 1×1, Portugal vence nos pênaltis',
+    destaque: 'text-amber-300 bg-amber-400/15 border-amber-400/30',
+  },
+  {
+    id: 'pen-exato-errou',
+    pontos: 50,
+    titulo: 'Placar exato + errou o vencedor nos pênaltis',
+    descricao: 'Você acertou o placar empatado, mas o time que escolheu nos pênaltis não avançou.',
+    exemplo: 'Palpite 1×1 + Brasil · Resultado 1×1, Argentina vence nos pênaltis',
+    destaque: 'text-amber-300/70 bg-amber-400/10 border-amber-400/20',
+  },
+  {
+    id: 'pen-empate-acertou',
+    pontos: 40,
+    titulo: 'Acertou o empate + acertou o vencedor nos pênaltis',
+    descricao: 'Errou o placar, mas previu o empate no tempo regulamentar e escolheu o time certo nos pênaltis.',
+    exemplo: 'Palpite 0×0 + França · Resultado 2×2, França vence nos pênaltis',
+    destaque: 'text-orange-300 bg-orange-400/12 border-orange-400/25',
+  },
+  {
+    id: 'pen-empate-errou',
+    pontos: 20,
+    titulo: 'Acertou o empate + errou o vencedor nos pênaltis',
+    descricao: 'Previu o empate corretamente, mas errou o time vencedor nos pênaltis.',
+    exemplo: 'Palpite 0×0 + Espanha · Resultado 2×2, Alemanha vence nos pênaltis',
+    destaque: 'text-orange-300/60 bg-orange-400/8 border-orange-400/15',
   },
 ] as const;
 
@@ -124,6 +162,17 @@ export const REGRAS_SECOES_KNOCKOUT: RegraSecao[] = [
       'No mata-mata os jogos têm muito mais peso: acertar o ganhador já vale 20 pontos, o dobro da tendência correta na fase de grupos.',
       'Cravar o placar exato vale 50 pontos — dois vezes o valor da fase de grupos — premiando quem faz a análise mais precisa.',
       'A diferença de pontuação reflete a dificuldade maior de prever jogos eliminatórios.',
+    ],
+  },
+  {
+    id: 'penaltis',
+    titulo: 'Palpite de pênaltis',
+    itens: [
+      'Nos jogos eliminatórios, sempre que você palpitar empate, o sistema vai pedir que você escolha qual time vence nos pênaltis.',
+      'O vencedor nos pênaltis é escolhido no mesmo momento do palpite — não é possível alterar depois que o jogo começa.',
+      'Se você editar o palpite e mudar para um placar sem empate, o sistema descarta automaticamente o vencedor de pênaltis que você havia escolhido.',
+      'O campo de pênaltis só aparece em jogos do mata-mata (16 avos em diante). Na fase de grupos não existe essa opção, pois empates são resultado válido.',
+      'Acertar o vencedor nos pênaltis dá bônus de pontos sobre a pontuação base do palpite — veja a tabela de pênaltis para os valores exatos.',
     ],
   },
   {

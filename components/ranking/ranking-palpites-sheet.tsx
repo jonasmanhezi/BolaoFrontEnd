@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { getTodayBrazilDateString } from '@/lib/match-time';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ListChecks, Lock, X } from 'lucide-react';
 import { PalpiteHistoryCard } from '@/components/palpite/palpite-history-card';
@@ -21,6 +22,7 @@ interface RankingPalpitesSheetProps {
   currentUserId: number | null;
   open: boolean;
   onClose: () => void;
+  knockout?: boolean;
 }
 
 function buildHistorico(palpites: Palpite[], partidas: Partida[]): HistoricoItem[] {
@@ -109,6 +111,7 @@ export function RankingPalpitesSheet({
 }: RankingPalpitesSheetProps) {
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
+  const knockout = getTodayBrazilDateString() >= '2026-06-28';
   const [historico, setHistorico] = useState<HistoricoItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -170,7 +173,7 @@ export function RankingPalpitesSheet({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] bg-[#050716]/85 backdrop-blur-sm flex items-end justify-center"
+          className={`fixed inset-0 z-[100] backdrop-blur-sm flex items-end justify-center ${knockout ? 'bg-[#0a0600]/85' : 'bg-[#050716]/85'}`}
           initial={animate ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
           exit={animate ? { opacity: 0 } : undefined}
@@ -178,7 +181,7 @@ export function RankingPalpitesSheet({
           onClick={onClose}
         >
           <motion.div
-            className="w-full max-w-xl max-h-[88dvh] palpite-modal-sheet rounded-t-[28px] rounded-b-none flex flex-col"
+            className={`w-full max-w-xl max-h-[88dvh] palpite-modal-sheet${knockout ? ' palpite-modal-sheet--knockout' : ''} rounded-t-[28px] rounded-b-none flex flex-col`}
             initial={animate ? { y: '100%' } : false}
             animate={{ y: 0 }}
             exit={animate ? { y: '100%' } : undefined}
@@ -260,6 +263,7 @@ export function RankingPalpitesSheet({
                               key={key}
                               palpite={item.palpite}
                               partida={item.partida}
+                              knockout={knockout}
                             />
                           ) : (
                             <LockedPalpiteCard key={key} partida={item.partida} />

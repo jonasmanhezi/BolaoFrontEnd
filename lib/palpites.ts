@@ -15,6 +15,7 @@ export interface Palpite {
   partidaId: number;
   golsCasa: number;
   golsVisitante: number;
+  palpiteWinnerId?: number | null;
   pontuacaoObtida?: number;
 }
 
@@ -22,6 +23,7 @@ export interface PalpiteLocal {
   id?: number;
   golsCasa: string;
   golsFora: string;
+  palpiteWinnerId?: number | null;
 }
 
 export interface PaginatedPalpiteResponse {
@@ -198,7 +200,8 @@ export async function atualizarPalpite(
   palpiteId: number,
   golsCasa: number,
   golsVisitante: number,
-  faseId?: number
+  faseId?: number,
+  palpiteWinnerId?: number | null
 ): Promise<Palpite> {
   const res = await apiFetch(
     `${getBackendApiBase()}/palpites/${palpiteId}`,
@@ -208,7 +211,12 @@ export async function atualizarPalpite(
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ golsCasa, golsVisitante, ...(faseId != null && { faseId }) }),
+      body: JSON.stringify({
+        golsCasa,
+        golsVisitante,
+        ...(faseId != null && { faseId }),
+        palpiteWinnerId: palpiteWinnerId ?? null,
+      }),
     },
     { onUnauthorized: 'throw' }
   );
@@ -226,10 +234,11 @@ export async function criarOuAtualizarPalpite(
   golsCasa: number,
   golsVisitante: number,
   palpiteId?: number,
-  faseId?: number
+  faseId?: number,
+  palpiteWinnerId?: number | null
 ): Promise<Palpite> {
   if (palpiteId) {
-    return atualizarPalpite(palpiteId, golsCasa, golsVisitante, faseId);
+    return atualizarPalpite(palpiteId, golsCasa, golsVisitante, faseId, palpiteWinnerId);
   }
 
   const res = await apiFetch(
@@ -240,7 +249,14 @@ export async function criarOuAtualizarPalpite(
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ partidaId, golsCasa, golsVisitante, campeonatoId: getCampeonatoId(), ...(faseId != null && { faseId }) }),
+      body: JSON.stringify({
+        partidaId,
+        golsCasa,
+        golsVisitante,
+        campeonatoId: getCampeonatoId(),
+        ...(faseId != null && { faseId }),
+        palpiteWinnerId: palpiteWinnerId ?? null,
+      }),
     },
     { onUnauthorized: 'throw' }
   );
@@ -261,6 +277,7 @@ export function mapPalpitesToRecord(palpites: Palpite[]): Record<number, Palpite
       id: p.id,
       golsCasa: String(p.golsCasa),
       golsFora: String(p.golsVisitante),
+      palpiteWinnerId: p.palpiteWinnerId ?? null,
     };
     return acc;
   }, {});

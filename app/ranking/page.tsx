@@ -120,7 +120,7 @@ export default function RankingPage() {
           <button
             type="button"
             onClick={() => loadRanking(true)}
-            disabled={loading || refreshing}
+            disabled={!!(loading || refreshing)}
             aria-label="Atualizar ranking"
             className="shrink-0 mt-1 w-10 h-10 rounded-xl liquid-glass-pill flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
           >
@@ -177,6 +177,7 @@ export default function RankingPage() {
                 ranking={ranking}
                 leader={leader}
                 currentUserId={currentUserId}
+                knockout={isKnockout}
               />
             </motion.div>
 
@@ -244,6 +245,7 @@ export default function RankingPage() {
         currentUserId={currentUserId}
         open={palpitesEntry != null}
         onClose={closePalpites}
+        knockout={isKnockout}
       />
 
       <RankingAuraPopup

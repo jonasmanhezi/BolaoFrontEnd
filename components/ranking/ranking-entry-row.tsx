@@ -35,6 +35,7 @@ export function RankingEntryRow({
 
   return (
     <FrostedCard
+      knockout={knockout}
       className={cn(
         'p-4',
         isCurrentUser &&

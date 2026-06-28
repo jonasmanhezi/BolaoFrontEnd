@@ -20,22 +20,47 @@ export interface Partida {
   status?: PartidaStatus;
   campeonatoId?: number;
   faseId?: number;
+  timeCasaId?: number;
+  timeVisitanteId?: number;
+  temPenalti?: boolean;
+  winnerId?: number | null;
+  penaltiCasa?: number | null;
+  penaltiVisitante?: number | null;
 }
 
 interface RawPartida {
   id: number;
   timeCasaId?: number;
+  time_casa_id?: number;
   timeVisitanteId?: number;
+  time_visitante_id?: number;
   dataHoraPartida?: string;
+  data_hora_partida?: string;
   nomeCasa?: string;
+  nome_casa?: string;
   nomeVisitante?: string;
+  nome_visitante?: string;
   logoCasa?: string;
+  logo_casa?: string;
   logoFora?: string;
+  logo_fora?: string;
   golsCasa?: number | null;
+  gols_casa?: number | null;
   golsVisitante?: number | null;
+  gols_visitante?: number | null;
   status?: string;
   campeonatoId?: number;
+  campeonato_id?: number;
   faseId?: number;
+  fase_id?: number;
+  temPenalti?: boolean;
+  tem_penalti?: boolean;
+  winnerId?: number | null;
+  winner_id?: number | null;
+  penaltiCasa?: number | null;
+  penalti_casa?: number | null;
+  penaltiVisitante?: number | null;
+  penalti_visitante?: number | null;
 }
 
 import { getBackendApiBase } from '@/lib/backend-url';
@@ -106,12 +131,16 @@ export async function getAllPartidas(): Promise<Partida[]> {
 
       const raw: RawPartida[] = await res.json();
       const mapped: Partida[] = raw.map((p) => {
-        const casaInfo = getTeamInfo(p.timeCasaId);
-        const foraInfo = getTeamInfo(p.timeVisitanteId);
-        const { data, horario } = formatPartidaDataHora(p.dataHoraPartida ?? null);
+        const timeCasaId = p.timeCasaId ?? p.time_casa_id;
+        const timeVisitanteId = p.timeVisitanteId ?? p.time_visitante_id;
+        const casaInfo = getTeamInfo(timeCasaId);
+        const foraInfo = getTeamInfo(timeVisitanteId);
+        const { data, horario } = formatPartidaDataHora(
+          p.dataHoraPartida ?? p.data_hora_partida ?? null
+        );
 
-        const casa = p.nomeCasa || casaInfo.name;
-        const fora = p.nomeVisitante || foraInfo.name;
+        const casa = p.nomeCasa ?? p.nome_casa ?? casaInfo.name;
+        const fora = p.nomeVisitante ?? p.nome_visitante ?? foraInfo.name;
 
         return {
           id: p.id,
@@ -121,15 +150,21 @@ export async function getAllPartidas(): Promise<Partida[]> {
           fora,
           siglaCasa: getTeamSigla(casa) !== '---' ? getTeamSigla(casa) : casaInfo.sigla,
           siglaFora: getTeamSigla(fora) !== '---' ? getTeamSigla(fora) : foraInfo.sigla,
-          nomeCasa: p.nomeCasa,
-          nomeVisitante: p.nomeVisitante,
-          logoCasa: getTeamLogo(p.logoCasa, casaInfo.logo),
-          logoFora: getTeamLogo(p.logoFora, foraInfo.logo),
-          golsCasa: p.golsCasa ?? null,
-          golsVisitante: p.golsVisitante ?? null,
+          nomeCasa: casa,
+          nomeVisitante: fora,
+          logoCasa: getTeamLogo(p.logoCasa ?? p.logo_casa, casaInfo.logo),
+          logoFora: getTeamLogo(p.logoFora ?? p.logo_fora, foraInfo.logo),
+          golsCasa: p.golsCasa ?? p.gols_casa ?? null,
+          golsVisitante: p.golsVisitante ?? p.gols_visitante ?? null,
           status: mapPartidaStatus(p.status),
-          campeonatoId: p.campeonatoId,
-          faseId: p.faseId,
+          campeonatoId: p.campeonatoId ?? p.campeonato_id,
+          faseId: p.faseId ?? p.fase_id,
+          timeCasaId,
+          timeVisitanteId,
+          temPenalti: p.temPenalti ?? p.tem_penalti,
+          winnerId: p.winnerId ?? p.winner_id ?? null,
+          penaltiCasa: p.penaltiCasa ?? p.penalti_casa ?? null,
+          penaltiVisitante: p.penaltiVisitante ?? p.penalti_visitante ?? null,
         };
       });
 

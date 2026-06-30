@@ -39,7 +39,6 @@ import {
 import { SessionExpiredError } from '@/lib/api-fetch';
 import { isSessionExpired, redirectToLogin } from '@/lib/auth-session';
 import { hasGrupoSession } from '@/lib/grupo';
-import { PalpiteCampeaoModal } from '@/components/palpite-campeao/palpite-campeao-modal';
 
 export default function PalpitesPage() {
   const router = useRouter();
@@ -309,7 +308,6 @@ export default function PalpitesPage() {
 
       <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout={selectedDate >= '2026-06-28'} />
       <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout={selectedDate >= '2026-06-28'} />
-      <PalpiteCampeaoModal todayBrazil={todayBrazil} />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-6 pb-32">
         <motion.div

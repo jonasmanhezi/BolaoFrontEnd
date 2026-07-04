@@ -18,9 +18,10 @@ import { DEFAULT_TEAM_LOGO } from '@/lib/partidas';
 const FASE_LABELS: Record<number, string> = {
   1: 'Fase de Grupos',
   2: '16 Avos de Final',
-  3: 'Quartas de Final',
-  4: 'Semifinal',
-  5: 'Final',
+  3: 'Oitavas de Final',
+  4: 'Quartas de Final',
+  5: 'Semifinal',
+  6: 'Final',
 };
 
 const NAMES_PT: Record<string, string> = {

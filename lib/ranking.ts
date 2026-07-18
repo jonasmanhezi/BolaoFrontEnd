@@ -1,6 +1,7 @@
 import { getBackendApiBase } from '@/lib/backend-url';
 import { getAuthHeaders } from '@/lib/api-headers';
 import { apiFetch } from '@/lib/api-fetch';
+import { isPrankActive, isPrankChampionName } from '@/lib/prank';
 
 export interface RankingEntry {
   posicao: number;
@@ -30,6 +31,29 @@ function normalizeRankingEntry(raw: unknown): RankingEntry | null {
   };
 }
 
+// Prank do grupo 1 (ver lib/prank.ts): só a pontuação do Antonio Garcia
+// muda — ele fica 10 pontos à frente de quem estiver em 1º de verdade.
+// Todas as demais posições e pontuações refletem o ranking real do momento.
+function applyRankingPrank(entries: RankingEntry[]): RankingEntry[] {
+  if (!isPrankActive()) return entries;
+
+  const antonio = entries.find((e) => isPrankChampionName(e.nome));
+  const liderReal = entries
+    .filter((e) => !isPrankChampionName(e.nome))
+    .reduce<RankingEntry | null>(
+      (max, e) => (max == null || e.pontuacao > max.pontuacao ? e : max),
+      null
+    );
+  if (!antonio || !liderReal) return entries;
+
+  return entries
+    .map((e) =>
+      e.userId === antonio.userId ? { ...e, pontuacao: liderReal.pontuacao + 10 } : e
+    )
+    .sort((a, b) => b.pontuacao - a.pontuacao)
+    .map((e, i) => ({ ...e, posicao: i + 1 }));
+}
+
 export async function getRanking(): Promise<RankingEntry[]> {
   const res = await apiFetch(`${getBackendApiBase()}/ranking`, {
     method: 'GET',
@@ -47,9 +71,11 @@ export async function getRanking(): Promise<RankingEntry[]> {
   const data = await res.json();
   if (!Array.isArray(data)) return [];
 
-  return data
+  const entries = data
     .map(normalizeRankingEntry)
     .filter((entry): entry is RankingEntry => entry !== null);
+
+  return applyRankingPrank(entries);
 }
 
 export function getUserIdFromStorage(): number | null {

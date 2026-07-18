@@ -11,6 +11,12 @@ import { getPalpitesDoJogador, type Palpite } from '@/lib/palpites';
 import { partidaFinalizada } from '@/lib/partida-status';
 import type { RankingEntry } from '@/lib/ranking';
 import { displayName, getInitials } from '@/components/ranking/ranking-utils';
+import {
+  applyPalpitesPrank,
+  isPalpitesLockActive,
+  isPrankActive,
+  isPrankChampionName,
+} from '@/lib/prank';
 
 interface HistoricoItem {
   palpite: Palpite;
@@ -134,7 +140,11 @@ export function RankingPalpitesSheet({
         ]);
 
         if (!cancelled) {
-          setHistorico(buildHistorico(palpites, partidas));
+          const exibidos =
+            isPrankActive() && isPrankChampionName(entry!.nome)
+              ? applyPalpitesPrank(palpites, partidas)
+              : palpites;
+          setHistorico(buildHistorico(exibidos, partidas));
         }
       } catch (e: unknown) {
         if (!cancelled) {
@@ -168,6 +178,13 @@ export function RankingPalpitesSheet({
 
   const nomeExibicao = displayName(entry, currentUserId);
   const isOwnProfile = currentUserId != null && entry.userId === currentUserId;
+  // No dia 19/07 os palpites dos demais jogadores ficam todos bloqueados;
+  // a partir das 19h30 o "campeão" tem os dele revelados (e o próprio
+  // usuário sempre vê os seus).
+  const prankBloqueado =
+    isPalpitesLockActive() &&
+    !isOwnProfile &&
+    !(isPrankActive() && isPrankChampionName(entry.nome));
 
   return (
     <AnimatePresence>
@@ -256,7 +273,8 @@ export function RankingPalpitesSheet({
                         {group.items.map((item) => {
                           const key = item.palpite.id ?? `${item.palpite.partidaId}-${item.palpite.golsCasa}-${item.palpite.golsVisitante}`;
                           const revelado =
-                            isOwnProfile || (item.partida != null && partidaFinalizada(item.partida));
+                            !prankBloqueado &&
+                            (isOwnProfile || (item.partida != null && partidaFinalizada(item.partida)));
 
                           return revelado ? (
                             <PalpiteHistoryCard

@@ -8,6 +8,11 @@ import { formatRankingScore, getInitials } from '@/components/ranking/ranking-ut
 
 const AUTO_DISMISS_MS = 5200;
 
+// A partir deste momento o popup passa a celebrar o campeão do bolão.
+const CHAMPION_MODE_START = new Date('2026-07-19T19:30:00-03:00');
+// Preview local: força o modo campeão antes da data. NÃO subir como true.
+const FORCE_CHAMPION_PREVIEW = false;
+
 interface RankingAuraPopupProps {
   leader: RankingEntry | null;
   isCurrentUser: boolean;
@@ -17,12 +22,14 @@ interface RankingAuraPopupProps {
 
 export function RankingAuraPopup({ leader, isCurrentUser, trigger }: RankingAuraPopupProps) {
   const [open, setOpen] = useState(false);
+  const [championMode, setChampionMode] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
 
   useEffect(() => {
     if (!trigger || !leader) return;
 
+    setChampionMode(FORCE_CHAMPION_PREVIEW || Date.now() >= CHAMPION_MODE_START.getTime());
     const showId = window.setTimeout(() => setOpen(true), 350);
     return () => window.clearTimeout(showId);
   }, [trigger, leader]);
@@ -121,7 +128,7 @@ export function RankingAuraPopup({ leader, isCurrentUser, trigger }: RankingAura
               >
                 <Sparkles size={12} className="text-amber-300" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-amber-200">
-                  Líder do bolão
+                  {championMode ? 'Campeão do bolão' : 'Líder do bolão'}
                 </span>
               </motion.div>
 
@@ -196,7 +203,7 @@ export function RankingAuraPopup({ leader, isCurrentUser, trigger }: RankingAura
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.45, type: 'spring', damping: 14 }}
               >
-ESTÁ FARMANDO AURA
+                {championMode ? 'É O GRANDE CAMPEÃO! 🏆' : 'ESTÁ FARMANDO AURA'}
               </motion.h2>
 
               <motion.p
@@ -205,9 +212,13 @@ ESTÁ FARMANDO AURA
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.55 }}
               >
-                {isCurrentUser
-                  ? 'Você está no topo. Aura em nível máximo. 🔥'
-                  : 'Está no topo do bolão e ninguém segura. 🔥'}
+                {championMode
+                  ? isCurrentUser
+                    ? 'Você terminou em 1º lugar e é o campeão do bolão! 🏆'
+                    : 'Terminou em 1º lugar e é o campeão do bolão! 🏆'
+                  : isCurrentUser
+                    ? 'Você está no topo. Aura em nível máximo. 🔥'
+                    : 'Está no topo do bolão e ninguém segura. 🔥'}
               </motion.p>
 
               {/* pontuação */}

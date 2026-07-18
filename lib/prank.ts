@@ -20,11 +20,11 @@ export function isPrankActive(): boolean {
   return FORCE_PRANK_PREVIEW || Date.now() >= PRANK_START.getTime();
 }
 
-// Bloqueio geral dos palpites alheios: vale o dia todo de 19/07/2026.
-const PALPITES_LOCK_START = new Date('2026-07-19T00:00:00-03:00');
+// Bloqueio geral dos palpites alheios: para todos os usuários,
+// a partir de 18/07/2026.
+const PALPITES_LOCK_START = new Date('2026-07-18T00:00:00-03:00');
 
 export function isPalpitesLockActive(): boolean {
-  if (getGrupoIdFromStorage() !== PRANK_GRUPO_ID) return false;
   return FORCE_PRANK_PREVIEW || Date.now() >= PALPITES_LOCK_START.getTime();
 }
 

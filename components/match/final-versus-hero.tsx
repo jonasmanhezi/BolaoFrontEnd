@@ -49,7 +49,7 @@ const VERSUS_EVENTS: Record<string, VersusEvent> = {
       sigla: 'ENG',
       nomePt: 'Inglaterra',
       player: '/final/harry.png?v=1',
-      imgClass: 'right-1 min-[430px]:-right-16 top-12 h-[110%]',
+      imgClass: '-right-3 min-[430px]:-right-16 top-12 h-[110%]',
       banner: [
         // filetes vermelhos finos (detalhes da camisa)
         'repeating-linear-gradient(90deg, transparent 0px, transparent 30px, rgba(206,17,38,0.28) 30px, rgba(206,17,38,0.28) 31px, transparent 31px, transparent 62px)',
@@ -83,6 +83,7 @@ const VERSUS_EVENTS: Record<string, VersusEvent> = {
       sigla: 'ARG',
       nomePt: 'Argentina',
       player: '/final/messi.png?v=2',
+      imgClass: 'right-4 top-8 h-[120%]',
       banner: [
         // listras verticais celeste/branco
         'repeating-linear-gradient(90deg, rgba(108,172,228,0.55) 0px, rgba(108,172,228,0.55) 30px, rgba(240,248,255,0.4) 30px, rgba(240,248,255,0.4) 60px)',

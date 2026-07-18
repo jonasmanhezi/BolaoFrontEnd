@@ -49,7 +49,7 @@ const VERSUS_EVENTS: Record<string, VersusEvent> = {
       sigla: 'ENG',
       nomePt: 'Inglaterra',
       player: '/final/harry.png?v=1',
-      imgClass: '-right-16 top-12 h-[112%]',
+      imgClass: '-right-7 min-[430px]:-right-16 top-12 h-[110%]',
       banner: [
         // filetes vermelhos finos (detalhes da camisa)
         'repeating-linear-gradient(90deg, transparent 0px, transparent 30px, rgba(206,17,38,0.28) 30px, rgba(206,17,38,0.28) 31px, transparent 31px, transparent 62px)',
@@ -69,6 +69,7 @@ const VERSUS_EVENTS: Record<string, VersusEvent> = {
       sigla: 'ESP',
       nomePt: 'Espanha',
       player: '/final/yamal.png?v=2',
+      imgClass: 'left-4 top-8 h-[120%]',
       banner: [
         // pinstripes finas douradas, como as da camisa
         'repeating-linear-gradient(90deg, transparent 0px, transparent 26px, rgba(255,196,0,0.28) 26px, rgba(255,196,0,0.28) 27px, transparent 27px, transparent 54px)',
@@ -285,7 +286,7 @@ export function FinalVersusFullscreen({
 
       {/* CTA */}
       <motion.div
-        className="relative z-10 mx-auto w-full max-w-md shrink-0 px-6 pb-8 pt-5"
+        className="relative z-10 mx-auto w-full max-w-md shrink-0 px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5"
         initial={animate ? { opacity: 0, y: 18 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: animate ? 0.9 : 0, duration: 0.5, ease }}

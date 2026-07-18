@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { TeamBadge } from '@/components/match/team-badge';
 import { MatchPalpiteCard, PalpiteDeadlineBanner } from '@/components/match/match-palpite-card';
 import { PalpiteCtaButton } from '@/components/match/palpite-cta-button';
+import { FinalVersusFullscreen, isGrandeFinal } from '@/components/match/final-versus-hero';
 import { ScoreStepper } from '@/components/match/score-stepper';
 import {
   formatDateLong,
@@ -50,6 +51,13 @@ export default function PalpitesPage() {
   const [selectedDate, setSelectedDate] = useState(() =>
     resolveDefaultCalendarDate(calendarDates)
   );
+  // Último dia visitado antes das telas fullscreen (3º lugar dia 18 e final dia 19)
+  const prevDateRef = useRef<string>('2026-07-17');
+  useEffect(() => {
+    if (selectedDate < '2026-07-18') {
+      prevDateRef.current = selectedDate;
+    }
+  }, [selectedDate]);
   const [allPartidas, setAllPartidas] = useState<Partida[]>([]);
   const [loading, setLoading] = useState(true);
   const [palpites, setPalpites] = useState<Record<number, PalpiteLocal>>({});
@@ -303,177 +311,8 @@ export default function PalpitesPage() {
     await doSubmitPalpite(null);
   };
 
-  return (
-    <div className={`min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative${selectedDate >= '2026-06-28' ? ' bolao-palpites-bg--knockout' : ''}`}>
-
-      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout={selectedDate >= '2026-06-28'} />
-      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout={selectedDate >= '2026-06-28'} />
-
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-6 pb-32">
-        <motion.div
-          className="mb-6"
-          initial={animate ? { opacity: 0, y: -10 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease }}
-        >
-          <h1 className="text-2xl font-bold tracking-wide">Palpites</h1>
-          <p className="text-sm opacity-70 mt-1">
-            Faça seus palpites para a Copa do Mundo 2026
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="mb-6"
-          initial={animate ? { opacity: 0, y: 12 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: animate ? 0.08 : 0, duration: 0.45, ease }}
-        >
-          <h2 className="text-sm font-medium mb-3 opacity-70 tracking-widest">CALENDÁRIO</h2>
-          <div
-            ref={calendarScrollRef}
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
-          >
-            {calendarDates.map((date, index) => {
-              const { weekday, day } = formatDateDisplay(date);
-              const isSelected = date === selectedDate;
-              const dayMarker = getCalendarDayMarker(date, todayBrazil);
-              return (
-                <motion.button
-                  key={date}
-                  data-calendar-date={date}
-                  onClick={() => setSelectedDate(date)}
-                  initial={animate ? { opacity: 0, y: 14 } : false}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: animate ? 0.12 + index * 0.025 : 0,
-                    duration: 0.35,
-                    ease,
-                  }}
-                  className={`min-w-[58px] min-h-[56px] px-3 py-2 rounded-2xl text-center transition-all duration-300 flex-shrink-0 ${
-                    isSelected
-                      ? 'liquid-glass-pill-active'
-                      : 'liquid-glass-pill hover:bg-white/10'
-                  }`}
-                >
-                  <div className="text-[10px] opacity-60 tracking-widest">{weekday}</div>
-                  <div className="text-2xl font-semibold tabular-nums">{day}</div>
-                  {dayMarker === 'today' ? (
-                    <span
-                      className="mx-auto mt-1 block h-1.5 w-1.5 rounded-full bg-emerald-400"
-                      aria-hidden
-                    />
-                  ) : dayMarker === 'past' ? (
-                    <span
-                      className="mx-auto mt-1 block h-1.5 w-1.5 rounded-full bg-white/35"
-                      aria-hidden
-                    />
-                  ) : (
-                    <span className="mx-auto mt-1 block h-1.5 w-1.5" aria-hidden />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="mb-4 flex items-center justify-between"
-          initial={animate ? { opacity: 0, y: 10 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: animate ? 0.28 : 0, duration: 0.4, ease }}
-        >
-          <div className="flex items-center gap-2.5">
-            <CalendarDays size={20} className="text-white/50" />
-            <h2 className="text-lg font-semibold tracking-tight">
-              {formatDateLong(selectedDate)}
-            </h2>
-          </div>
-          <span className="text-xs px-3 py-1.5 rounded-full liquid-glass-pill text-white/60 tabular-nums">
-            {loading ? '...' : partidasDoDia.length}{' '}
-            {partidasDoDia.length === 1 ? 'jogo' : 'jogos'}
-          </span>
-        </motion.div>
-
-        {palpitesError && (
-          <div className="mb-4 text-[10px] text-red-400 opacity-80">
-            {palpitesError}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex flex-col gap-4 max-w-xl mx-auto w-full animate-pulse">
-            {[0, 1].map((item) => (
-              <div key={item} className="frosted-card h-44">
-                <div className="frosted-card__blur" aria-hidden />
-                <div className="frosted-card__glass" aria-hidden />
-                <div className="frosted-card__shine" aria-hidden />
-                <span className="sr-only">Carregando jogos</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <AnimatePresence mode="wait">
-            {partidasDoDia.length === 0 ? (
-              <motion.div
-                key={`empty-${selectedDate}`}
-                className="frosted-card p-8 text-center text-white/60"
-                initial={animate ? { opacity: 0, y: 16 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                exit={animate ? { opacity: 0, y: -8 } : undefined}
-                transition={{ duration: 0.35, ease }}
-              >
-                <div className="frosted-card__blur" aria-hidden />
-                <div className="frosted-card__glass" aria-hidden />
-                <div className="frosted-card__shine" aria-hidden />
-                <p className="frosted-card__content">Nenhum jogo nesta data.</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key={selectedDate}
-                className="flex flex-col gap-4 max-w-xl mx-auto w-full"
-                initial={animate ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                exit={animate ? { opacity: 0 } : undefined}
-                transition={{ duration: 0.25 }}
-              >
-                {partidasDoDia.map((game, index) => (
-                  <motion.div
-                    key={game.id}
-                    className="flex flex-col gap-4"
-                    initial={animate ? { opacity: 0, y: 22 } : false}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: animate ? index * 0.08 : 0,
-                      duration: 0.42,
-                      ease,
-                    }}
-                  >
-                    <MatchPalpiteCard
-                      game={game}
-                      palpite={palpites[game.id]}
-                      onAction={() => openPalpiteModal(game)}
-                    />
-                    {index === 0 && (
-                      <motion.div
-                        initial={animate ? { opacity: 0, y: 10 } : false}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: animate ? 0.12 : 0,
-                          duration: 0.38,
-                          ease,
-                        }}
-                      >
-                        <PalpiteDeadlineBanner />
-                      </motion.div>
-                    )}
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      </div>
-
+  const renderModals = () => (
+    <>
       <AnimatePresence>
         {modalOpen && selectedGame && (
           <motion.div
@@ -703,6 +542,216 @@ export default function PalpitesPage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  );
+
+  const finalGame = !loading ? partidasDoDia.find(isGrandeFinal) : undefined;
+  const fullscreenMode = !!finalGame;
+
+  // Ao sair da tela fullscreen, o calendário remonta com o scroll zerado —
+  // reposiciona no dia selecionado.
+  useEffect(() => {
+    if (fullscreenMode) return;
+    const btn = calendarScrollRef.current?.querySelector(
+      `[data-calendar-date="${selectedDate}"]`
+    );
+    btn?.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }, [fullscreenMode, selectedDate]);
+
+  const calendarStrip = (
+    <div
+      ref={calendarScrollRef}
+      className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
+    >
+      {calendarDates.map((date, index) => {
+        const { weekday, day } = formatDateDisplay(date);
+        const isSelected = date === selectedDate;
+        const dayMarker = getCalendarDayMarker(date, todayBrazil);
+        return (
+          <motion.button
+            key={date}
+            data-calendar-date={date}
+            onClick={() => setSelectedDate(date)}
+            initial={animate ? { opacity: 0, y: 14 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: animate ? 0.12 + index * 0.025 : 0,
+              duration: 0.35,
+              ease,
+            }}
+            className={`min-w-[58px] min-h-[56px] px-3 py-2 rounded-2xl text-center transition-all duration-300 flex-shrink-0 ${
+              isSelected
+                ? 'liquid-glass-pill-active'
+                : 'liquid-glass-pill hover:bg-white/10'
+            }`}
+          >
+            <div className="text-[10px] opacity-60 tracking-widest">{weekday}</div>
+            <div className="text-2xl font-semibold tabular-nums">{day}</div>
+            {dayMarker === 'today' ? (
+              <span
+                className="mx-auto mt-1 block h-1.5 w-1.5 rounded-full bg-emerald-400"
+                aria-hidden
+              />
+            ) : dayMarker === 'past' ? (
+              <span
+                className="mx-auto mt-1 block h-1.5 w-1.5 rounded-full bg-white/35"
+                aria-hidden
+              />
+            ) : (
+              <span className="mx-auto mt-1 block h-1.5 w-1.5" aria-hidden />
+            )}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+
+  if (finalGame) {
+    return (
+      <div className="min-h-dvh bolao-palpites-bg bolao-palpites-page bolao-palpites-bg--knockout text-white relative">
+        <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout />
+        <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout />
+
+        <FinalVersusFullscreen
+          game={finalGame}
+          palpite={palpites[finalGame.id]}
+          onPalpite={() => openPalpiteModal(finalGame)}
+          onBack={() => setSelectedDate(prevDateRef.current)}
+        />
+
+        {renderModals()}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-dvh bolao-palpites-bg bolao-palpites-page text-white relative${selectedDate >= '2026-06-28' ? ' bolao-palpites-bg--knockout' : ''}`}>
+
+      <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout={selectedDate >= '2026-06-28'} />
+      <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout={selectedDate >= '2026-06-28'} />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-6 pb-32">
+        <motion.div
+          className="mb-6"
+          initial={animate ? { opacity: 0, y: -10 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease }}
+        >
+          <h1 className="text-2xl font-bold tracking-wide">Palpites</h1>
+          <p className="text-sm opacity-70 mt-1">
+            Faça seus palpites para a Copa do Mundo 2026
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="mb-6"
+          initial={animate ? { opacity: 0, y: 12 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: animate ? 0.08 : 0, duration: 0.45, ease }}
+        >
+          <h2 className="text-sm font-medium mb-3 opacity-70 tracking-widest">CALENDÁRIO</h2>
+          {calendarStrip}
+        </motion.div>
+
+        <motion.div
+          className="mb-4 flex items-center justify-between"
+          initial={animate ? { opacity: 0, y: 10 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: animate ? 0.28 : 0, duration: 0.4, ease }}
+        >
+          <div className="flex items-center gap-2.5">
+            <CalendarDays size={20} className="text-white/50" />
+            <h2 className="text-lg font-semibold tracking-tight">
+              {formatDateLong(selectedDate)}
+            </h2>
+          </div>
+          <span className="text-xs px-3 py-1.5 rounded-full liquid-glass-pill text-white/60 tabular-nums">
+            {loading ? '...' : partidasDoDia.length}{' '}
+            {partidasDoDia.length === 1 ? 'jogo' : 'jogos'}
+          </span>
+        </motion.div>
+
+        {palpitesError && (
+          <div className="mb-4 text-[10px] text-red-400 opacity-80">
+            {palpitesError}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col gap-4 max-w-xl mx-auto w-full animate-pulse">
+            {[0, 1].map((item) => (
+              <div key={item} className="frosted-card h-44">
+                <div className="frosted-card__blur" aria-hidden />
+                <div className="frosted-card__glass" aria-hidden />
+                <div className="frosted-card__shine" aria-hidden />
+                <span className="sr-only">Carregando jogos</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {partidasDoDia.length === 0 ? (
+              <motion.div
+                key={`empty-${selectedDate}`}
+                className="frosted-card p-8 text-center text-white/60"
+                initial={animate ? { opacity: 0, y: 16 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                exit={animate ? { opacity: 0, y: -8 } : undefined}
+                transition={{ duration: 0.35, ease }}
+              >
+                <div className="frosted-card__blur" aria-hidden />
+                <div className="frosted-card__glass" aria-hidden />
+                <div className="frosted-card__shine" aria-hidden />
+                <p className="frosted-card__content">Nenhum jogo nesta data.</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={selectedDate}
+                className="flex flex-col gap-4 max-w-xl mx-auto w-full"
+                initial={animate ? { opacity: 0 } : false}
+                animate={{ opacity: 1 }}
+                exit={animate ? { opacity: 0 } : undefined}
+                transition={{ duration: 0.25 }}
+              >
+                {partidasDoDia.map((game, index) => (
+                  <motion.div
+                    key={game.id}
+                    className="flex flex-col gap-4"
+                    initial={animate ? { opacity: 0, y: 22 } : false}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: animate ? index * 0.08 : 0,
+                      duration: 0.42,
+                      ease,
+                    }}
+                  >
+                    <MatchPalpiteCard
+                      game={game}
+                      palpite={palpites[game.id]}
+                      onAction={() => openPalpiteModal(game)}
+                    />
+                    {index === 0 && (
+                      <motion.div
+                        initial={animate ? { opacity: 0, y: 10 } : false}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: animate ? 0.12 : 0,
+                          duration: 0.38,
+                          ease,
+                        }}
+                      >
+                        <PalpiteDeadlineBanner />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+      </div>
+
+      {renderModals()}
     </div>
   );
 }

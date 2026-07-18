@@ -228,41 +228,46 @@ export function FinalVersusFullscreen({
 
       {/* data / horário / placar */}
       <motion.div
-        className="relative z-10 -mt-1 shrink-0 text-center"
+        className="relative z-10 flex shrink-0 flex-col items-center px-6 pt-3 text-center"
         initial={animate ? { opacity: 0, y: 16 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: animate ? 0.75 : 0, duration: 0.55, ease }}
       >
-        <div className="text-[11px] font-semibold uppercase tracking-[6px] text-amber-300/75">
-          {event.titulo}
+        <div className="mb-2 flex items-center gap-3">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-amber-400/60" aria-hidden />
+          <span className="text-[11px] font-semibold uppercase tracking-[5px] text-amber-300/90">
+            {event.titulo}
+          </span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-amber-400/60" aria-hidden />
         </div>
+
         {partidaTemResultado(game) ? (
-          <div className="mt-1 text-[56px] font-black leading-none tabular-nums tracking-tight text-white">
-            {leftGols} <span className="text-amber-400">×</span> {rightGols}
+          <div className="text-[52px] font-black leading-none tabular-nums tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+            {leftGols} <span className="text-amber-300">×</span> {rightGols}
           </div>
         ) : (
-          <>
-            <div className="mt-1 text-[44px] font-black leading-none tracking-tight text-white max-[380px]:text-[38px]">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="text-[36px] font-black leading-none tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] max-[380px]:text-[32px]">
               {event.dataLabel}
             </div>
-            <div className="mt-1 bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-[40px] font-black leading-none tabular-nums tracking-tight text-transparent max-[380px]:text-[34px]">
+            <div className="rounded-full border border-amber-300/30 bg-black/25 px-4 py-1 text-[22px] font-black leading-none tabular-nums tracking-wide text-amber-300 backdrop-blur-sm max-[380px]:text-[20px]">
               {game.horario}
             </div>
-          </>
+          </div>
         )}
 
-        <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-white/50">
-          <img src={leftLogo} alt={left.nomePt} className="h-4 w-4 object-contain" />
+        <div className="mt-3 flex items-center justify-center gap-2 text-[12px] text-white/70">
+          <img src={leftLogo} alt={left.nomePt} className="h-4 w-4 rounded-[3px] object-cover" />
           <span className="font-semibold tracking-wide">{left.nomePt}</span>
-          <span className="text-white/30">·</span>
+          <span className="font-black text-amber-300/70">×</span>
           <span className="font-semibold tracking-wide">{right.nomePt}</span>
-          <img src={rightLogo} alt={right.nomePt} className="h-4 w-4 object-contain" />
+          <img src={rightLogo} alt={right.nomePt} className="h-4 w-4 rounded-[3px] object-cover" />
         </div>
 
         {temPalpite && palpite && (
-          <div className="mt-1.5 text-[11px] text-amber-200/70">
+          <div className="mt-2 rounded-full bg-black/25 px-3 py-1 text-[11px] text-amber-100/80 backdrop-blur-sm">
             Seu palpite:{' '}
-            <span className="font-bold tabular-nums">
+            <span className="font-bold tabular-nums text-amber-200">
               {palpiteLeft} × {palpiteRight}
             </span>
           </div>

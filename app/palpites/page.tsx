@@ -602,7 +602,11 @@ export default function PalpitesPage() {
   if (finalGame) {
     return (
       <div className="min-h-dvh bolao-palpites-bg bolao-palpites-page bolao-palpites-bg--knockout text-white relative">
-        <AppMobileHeader onMenuOpen={() => setMenuOpen(true)} knockout />
+        <AppMobileHeader
+          onMenuOpen={() => setMenuOpen(true)}
+          onBack={() => setSelectedDate('2026-07-17')}
+          knockout
+        />
         <MobileSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} knockout />
 
         <FinalVersusFullscreen

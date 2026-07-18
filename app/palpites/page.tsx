@@ -51,13 +51,6 @@ export default function PalpitesPage() {
   const [selectedDate, setSelectedDate] = useState(() =>
     resolveDefaultCalendarDate(calendarDates)
   );
-  // Último dia visitado antes das telas fullscreen (3º lugar dia 18 e final dia 19)
-  const prevDateRef = useRef<string>('2026-07-17');
-  useEffect(() => {
-    if (selectedDate < '2026-07-18') {
-      prevDateRef.current = selectedDate;
-    }
-  }, [selectedDate]);
   const [allPartidas, setAllPartidas] = useState<Partida[]>([]);
   const [loading, setLoading] = useState(true);
   const [palpites, setPalpites] = useState<Record<number, PalpiteLocal>>({});
@@ -616,7 +609,6 @@ export default function PalpitesPage() {
           game={finalGame}
           palpite={palpites[finalGame.id]}
           onPalpite={() => openPalpiteModal(finalGame)}
-          onBack={() => setSelectedDate(prevDateRef.current)}
         />
 
         {renderModals()}

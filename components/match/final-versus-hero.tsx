@@ -49,7 +49,7 @@ const VERSUS_EVENTS: Record<string, VersusEvent> = {
       sigla: 'ENG',
       nomePt: 'Inglaterra',
       player: '/final/harry.png?v=1',
-      imgClass: '-right-7 min-[430px]:-right-16 top-12 h-[110%]',
+      imgClass: 'right-1 min-[430px]:-right-16 top-12 h-[110%]',
       banner: [
         // filetes vermelhos finos (detalhes da camisa)
         'repeating-linear-gradient(90deg, transparent 0px, transparent 30px, rgba(206,17,38,0.28) 30px, rgba(206,17,38,0.28) 31px, transparent 31px, transparent 62px)',
@@ -106,15 +106,12 @@ interface FinalVersusFullscreenProps {
   game: Partida;
   palpite?: PalpiteLocal;
   onPalpite: () => void;
-  /** Volta para a tela de palpites no dia anterior */
-  onBack: () => void;
 }
 
 export function FinalVersusFullscreen({
   game,
   palpite,
   onPalpite,
-  onBack,
 }: FinalVersusFullscreenProps) {
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
@@ -136,19 +133,7 @@ export function FinalVersusFullscreen({
   const palpiteRight = leftIsCasa ? palpite?.golsFora : palpite?.golsCasa;
 
   return (
-    <div className="relative flex h-[calc(100dvh-68px)] flex-col overflow-hidden bg-gradient-to-b from-[#2a1c05] via-[#181005] to-[#080500]">
-      {/* botão voltar */}
-      <motion.button
-        type="button"
-        onClick={onBack}
-        aria-label="Voltar para os palpites"
-        className="absolute left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-xl liquid-glass-pill text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-        initial={animate ? { opacity: 0, x: -12 } : false}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: animate ? 0.3 : 0, duration: 0.4, ease }}
-      >
-        <ArrowLeft size={22} />
-      </motion.button>
+    <div className="relative flex h-[calc(100dvh-68px)] flex-col overflow-hidden bg-gradient-to-b from-[#8a6a1a] via-[#5c4408] to-[#241a04]">
 
       {/* arena: jogadores + banners de cores dos países */}
       <div className="relative min-h-0 flex-[1.2] overflow-hidden">
@@ -236,7 +221,7 @@ export function FinalVersusFullscreen({
 
         {/* fade para o fundo escuro */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-28 bg-gradient-to-t from-[#100a02] to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-28 bg-gradient-to-t from-[#40300a] to-transparent"
           aria-hidden
         />
       </div>

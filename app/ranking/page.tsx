@@ -17,11 +17,13 @@ import { RankingAuraPopup } from '@/components/ranking/ranking-aura-popup';
 import { RankingYourStanding } from '@/components/ranking/ranking-your-standing';
 import { splitRanking, isCurrentUserEntry } from '@/components/ranking/ranking-utils';
 import {
+  applyRankingPrank,
   getRanking,
   getUserIdFromStorage,
   type RankingEntry,
 } from '@/lib/ranking';
 import { hasGrupoSession } from '@/lib/grupo';
+import { isPrankActive } from '@/lib/prank';
 
 export default function RankingPage() {
   const router = useRouter();
@@ -34,10 +36,27 @@ export default function RankingPage() {
   );
   const [menuOpen, setMenuOpen] = useState(false);
   const [palpitesEntry, setPalpitesEntry] = useState<RankingEntry | null>(null);
+  // Prank do grupo 1: começa mockado (Antonio 1º) e o "VAR" revela o real.
+  const [prankRevealed, setPrankRevealed] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const animate = !shouldReduceMotion;
 
-  const { sorted, podium, rest, leader } = splitRanking(ranking);
+  const displayedRanking = useMemo(
+    () => (prankRevealed ? ranking : applyRankingPrank(ranking)),
+    [ranking, prankRevealed]
+  );
+  // TODO(prank): log temporário de diagnóstico — remover junto com o prank.
+  useEffect(() => {
+    if (ranking.length === 0) return;
+    console.log('[prank-debug]', {
+      grupoId: localStorage.getItem('grupoId'),
+      agora: new Date().toISOString(),
+      prankAtivo: isPrankActive(),
+      nomes: ranking.map((e) => `${e.posicao}. ${e.nome}`),
+    });
+  }, [ranking]);
+  const { sorted, podium, rest, leader } = splitRanking(displayedRanking);
+  const realLeader = splitRanking(ranking).leader;
   const isKnockout = getTodayBrazilDateString() >= '2026-06-28';
 
   const currentUserEntry = useMemo(
@@ -174,7 +193,7 @@ export default function RankingPage() {
               transition={{ delay: animate ? 0.48 : 0, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             >
               <RankingStatsBar
-                ranking={ranking}
+                ranking={displayedRanking}
                 leader={leader}
                 currentUserId={currentUserId}
                 knockout={isKnockout}
@@ -250,8 +269,13 @@ export default function RankingPage() {
 
       <RankingAuraPopup
         leader={leader}
+        realLeader={realLeader}
         isCurrentUser={leader ? isCurrentUserEntry(leader, currentUserId) : false}
+        isRealLeaderCurrentUser={
+          realLeader ? isCurrentUserEntry(realLeader, currentUserId) : false
+        }
         trigger={!loading && !error && ranking.length > 0}
+        onPrankReveal={() => setPrankRevealed(true)}
       />
     </div>
   );

@@ -34,7 +34,8 @@ function normalizeRankingEntry(raw: unknown): RankingEntry | null {
 // Prank do grupo 1 (ver lib/prank.ts): só a pontuação do Antonio Garcia
 // muda — ele fica 10 pontos à frente de quem estiver em 1º de verdade.
 // Todas as demais posições e pontuações refletem o ranking real do momento.
-function applyRankingPrank(entries: RankingEntry[]): RankingEntry[] {
+// A página de ranking aplica isso e depois "reverte" na sequência do VAR.
+export function applyRankingPrank(entries: RankingEntry[]): RankingEntry[] {
   if (!isPrankActive()) return entries;
 
   const antonio = entries.find((e) => isPrankChampionName(e.nome));
@@ -71,11 +72,9 @@ export async function getRanking(): Promise<RankingEntry[]> {
   const data = await res.json();
   if (!Array.isArray(data)) return [];
 
-  const entries = data
+  return data
     .map(normalizeRankingEntry)
     .filter((entry): entry is RankingEntry => entry !== null);
-
-  return applyRankingPrank(entries);
 }
 
 export function getUserIdFromStorage(): number | null {

@@ -29,7 +29,13 @@ export function isPalpitesLockActive(): boolean {
 }
 
 export function isPrankChampionName(nome: string): boolean {
-  return nome.toLowerCase().includes('antonio garcia');
+  const normalizado = nome
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+  return normalizado.includes('antonio garcia');
 }
 
 function pontuacaoMaxima(partida: Partida): number {
